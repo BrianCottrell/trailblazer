@@ -60,10 +60,12 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ImageButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -108,29 +110,31 @@ public class MainActivity extends AppCompatActivity {
     private static final String ACTION_BUTTON_PTT_LONG_PRESS_BITTIUM = "com.elektrobit.pttbutton.PTTBUTTON_LONG_PRESS";
     private BroadcastReceiver mButtonPTTBroadCastRecvMCPTT;
 
-    private Button btn_register;
-    private Button btn_unregister;
+//    private Button btn_register;
+//    private Button btn_unregister;
     private TextView text_info;
     private TextView text_error;
     private TextView text_affiliation;
     private TextView text_status;
-    private Button btn_hangup;
+    // private Button btn_hangup;
     private DialogMenu mDialogIds;
     private DialogAlert mDialogAlert;
     private Button btn_accept;
     private Button reg_status;
     private Button reg_eMBMS;
-    private Button btn_call;
-    private Button btn_speaker;
-    private Button btn_er;
+    private ImageButton btn_call;
+    private ImageButton btn_speaker;
+//    private Button btn_er;
     private TextView text_talking;
     private TextView text_callingid;
-    private TextView switch_private;
-    private TextView switch_group;
+//    private TextView switch_private;
+//    private TextView switch_group;
     private Toolbar toolbar;
     private TextView text_emergency;
+    private RadioGroup callRadioGroup;
     private Button btn_map;
-    private ToggleButton btn_track;
+    private Switch btn_track;
+    private Switch btn_emergency;
     private PreferencesManagerDefault preferencesManager;
     private static final String PARAMETER_PROFILE = "parameters";
     private static final String PARAMETER_SAVE_PROFILE = "TAG.PARAMETER_SAVE_PROFILE";
@@ -140,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
     private Map<String, String> clients;
     private DialogMenu mDialogMenu;
     private String currentProfile;
-    private SwitchCompat switchCompat;
+//    private SwitchCompat switchCompat;
     private Spinner spinnerGroups;
     private Spinner spinnerUsers;
     private MenuItem itemIdMSCSM;
@@ -155,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean autoRegister = false;
     private boolean registered = false;
     private boolean tracking = false;
+    private boolean emergency = false;
 
     private enum State {
         GRANTED,
@@ -183,44 +188,46 @@ public class MainActivity extends AppCompatActivity {
 
         toolbar = (Toolbar) findViewById(R.id.screen_menu_toolbar);
         setSupportActionBar(toolbar);
-        btn_register = (Button) findViewById(R.id.btn_register);
-        btn_unregister = (Button) findViewById(R.id.btn_unregister);
+//        btn_register = (Button) findViewById(R.id.btn_groupcall);
+//        btn_unregister = (Button) findViewById(R.id.btn_privatecall);
         text_info = (TextView) findViewById(R.id.text_info);
         text_error = (TextView) findViewById(R.id.text_error);
         text_affiliation = (TextView) findViewById(R.id.text_affiliation);
         text_status = (TextView) findViewById(R.id.text_status);
-        btn_hangup = (Button) findViewById(R.id.btn_hangup);
+        // btn_hangup = (Button) findViewById(R.id.btn_hangup);
         btn_accept = (Button) findViewById(R.id.btn_accept);
         reg_status = (Button) findViewById(R.id.reg_status);
         reg_eMBMS = (Button) findViewById(R.id.reg_eMBMS);
-        btn_call = (Button) findViewById(R.id.btn_call);
-        btn_speaker = (Button) findViewById(R.id.btn_speaker);
-        btn_er = (Button) findViewById(R.id.btn_er);
+        btn_call = (ImageButton) findViewById(R.id.btn_call);
+        btn_speaker = (ImageButton) findViewById(R.id.btn_speaker);
+//        btn_er = (Button) findViewById(R.id.btn_er);
         text_talking = (TextView) findViewById(R.id.text_talking);
         text_callingid = (TextView) findViewById(R.id.text_callingid);
-        switch_private = (TextView) findViewById(R.id.switch_private);
-        switch_group = (TextView) findViewById(R.id.switch_group);
-        switchCompat = (SwitchCompat) findViewById(R.id.switch_call);
+//        switch_private = (TextView) findViewById(R.id.switch_private);
+//        switch_group = (TextView) findViewById(R.id.switch_group);
+//        switchCompat = (SwitchCompat) findViewById(R.id.switch_call);
         spinnerGroups = (Spinner) findViewById(R.id.spinnerGroups);
         spinnerUsers = (Spinner) findViewById(R.id.spinnerUsers);
         text_emergency = (TextView) findViewById(R.id.emergency);
         btn_map = (Button) findViewById(R.id.mapButton);
-        btn_track = (ToggleButton) findViewById(R.id.trackingButton);
+        btn_track = (Switch) findViewById(R.id.trackingButton);
+        btn_emergency = (Switch) findViewById(R.id.emergencyButton);
+        callRadioGroup = (RadioGroup) findViewById(R.id.callRadioGroup);
 
-        btn_unregister.setEnabled(false);
+//        btn_unregister.setEnabled(false);
         btn_call.setEnabled(false);
-        btn_register.setEnabled(true);
+//        btn_register.setEnabled(true);
         btn_accept.setEnabled(false);
-        btn_hangup.setEnabled(false);
+//        btn_hangup.setEnabled(false);
         reg_status.setEnabled(false);
         reg_eMBMS.setEnabled(false);
-        btn_speaker.setEnabled(false);
-        btn_er.setEnabled(false);
+        btn_speaker.setEnabled(true);
+//        btn_er.setEnabled(false);
         text_talking.setVisibility((View.INVISIBLE));
         text_callingid.setVisibility((View.INVISIBLE));
-        switchCompat.setEnabled(false);
-        switch_group.setTextColor(ContextCompat.getColor(this, R.color.background));
-        switch_private.setTextColor(ContextCompat.getColor(this, R.color.background));
+//        switchCompat.setEnabled(false);
+//        switch_group.setTextColor(ContextCompat.getColor(this, R.color.background));
+//        switch_private.setTextColor(ContextCompat.getColor(this, R.color.background));
         spinnerGroups.setEnabled(false);
         spinnerGroups.setAdapter(null);
         spinnerUsers.setEnabled(false);
@@ -391,7 +398,7 @@ public class MainActivity extends AppCompatActivity {
                                                         text_callingid.setText(callerID);
                                                         spinnerGroups.setEnabled(false);
                                                         spinnerUsers.setEnabled(false);
-                                                        switchCompat.setEnabled(false);
+//                                                        switchCompat.setEnabled(false);
                                                         showIdsAcceptCall(getApplicationContext(), sessionID);
                                                         break;
                                                     case RINGING:
@@ -399,7 +406,7 @@ public class MainActivity extends AppCompatActivity {
                                                         sessionID = action.getStringExtra(ConstantsMCOP.CallEventExtras.SESSION_ID);
                                                         spinnerGroups.setEnabled(false);
                                                         spinnerUsers.setEnabled(false);
-                                                        switchCompat.setEnabled(false);
+//                                                        switchCompat.setEnabled(false);
                                                         showData("callEvent (" + sessionID + ")", "RINGING");
                                                         if (sessionID != null)
                                                             userData.addSessionID(sessionID);
@@ -409,8 +416,8 @@ public class MainActivity extends AppCompatActivity {
                                                         sessionID = action.getStringExtra(ConstantsMCOP.CallEventExtras.SESSION_ID);
                                                         spinnerGroups.setEnabled(false);
                                                         spinnerUsers.setEnabled(false);
-                                                        switchCompat.setEnabled(false);
-                                                        btn_er.setEnabled(false);
+//                                                        switchCompat.setEnabled(false);
+//                                                        btn_er.setEnabled(false);
                                                         showData("callEvent (" + sessionID + ")", "INPROGRESS");
                                                         if (sessionID != null)
                                                             userData.addSessionID(sessionID);
@@ -429,27 +436,27 @@ public class MainActivity extends AppCompatActivity {
                                                         showData("callEvent (" + sessionID + ")", "CONNECTED");
                                                         if (sessionID != null)
                                                             userData.addSessionID(sessionID);
-                                                        btn_er.setEnabled(false);
+//                                                        btn_er.setEnabled(false);
                                                         break;
                                                     case TERMINATED:
                                                         Log.d(TAG, "STATE: TERMINATED");
                                                         sessionID = action.getStringExtra(ConstantsMCOP.CallEventExtras.SESSION_ID);
                                                         spinnerGroups.setEnabled(true);
                                                         spinnerUsers.setEnabled(true);
-                                                        switchCompat.setEnabled(true);
-                                                        switch_group.setTextColor(ContextCompat.getColor(getBaseContext(), R.color.background));
-                                                        switch_private.setTextColor(ContextCompat.getColor(getBaseContext(), R.color.background));
+//                                                        switchCompat.setEnabled(true);
+//                                                        switch_group.setTextColor(ContextCompat.getColor(getBaseContext(), R.color.background));
+//                                                        switch_private.setTextColor(ContextCompat.getColor(getBaseContext(), R.color.background));
                                                         showData("callEvent (" + sessionID + ")", "TERMINATED");
                                                         if (sessionID != null)
                                                             userData.removeSessionID(sessionID);
                                                         if (mERState == false) {
                                                             endERState();
                                                         }
-                                                        btn_call.setBackgroundResource(R.drawable.circle_btn);
+                                                        btn_call.setBackgroundResource(R.drawable.roundedcallgreen);
                                                         mState = State.NONE;
                                                         btn_call.setEnabled(true);
-                                                        btn_hangup.setEnabled(false);
-                                                        btn_er.setEnabled(true);
+//                                                        btn_hangup.setEnabled(false);
+//                                                        btn_er.setEnabled(true);
                                                         text_talking.setVisibility((View.INVISIBLE));
                                                         text_callingid.setVisibility((View.INVISIBLE));
                                                         break;
@@ -505,7 +512,7 @@ public class MainActivity extends AppCompatActivity {
                                                             btn_call.setBackgroundResource(R.color.registered);
                                                             mState = State.GRANTED;
                                                             btn_call.setEnabled(true);
-                                                            btn_hangup.setEnabled(true);
+//                                                            btn_hangup.setEnabled(true);
                                                             break;
                                                         case idle:
                                                             Log.d(TAG, "TOKEN IDLE");
@@ -513,7 +520,7 @@ public class MainActivity extends AppCompatActivity {
                                                             btn_call.setBackgroundResource(R.color.cardview_light_background);
                                                             mState = State.IDLE;
                                                             btn_call.setEnabled(true);
-                                                            btn_hangup.setEnabled(true);
+//                                                            btn_hangup.setEnabled(true);
                                                             text_talking.setVisibility((View.INVISIBLE));
                                                             text_callingid.setVisibility((View.INVISIBLE));
                                                             break;
@@ -525,7 +532,7 @@ public class MainActivity extends AppCompatActivity {
                                                             showData("floorControl (" + sessionID + ")", " granted " + "-> userIDTaken(allowRequest=" + allow_request + "):(" + userIDTaken + ":" + displayNameTaken + ")");
                                                             mState = State.TAKEN;
                                                             btn_call.setEnabled(false);
-                                                            btn_hangup.setEnabled(true);
+//                                                            btn_hangup.setEnabled(true);
                                                             btn_call.setBackgroundResource(R.color.unregistered);
                                                             text_talking.setVisibility((View.VISIBLE));
                                                             text_callingid.setVisibility((View.VISIBLE));
@@ -670,6 +677,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
+        /*
         btn_register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -691,7 +699,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        */
 
+        /*
         btn_hangup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -700,6 +710,7 @@ public class MainActivity extends AppCompatActivity {
                 showIds(getApplicationContext());
             }
         });
+        */
 
         btn_accept.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -709,6 +720,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        /*
         btn_er.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -724,6 +736,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+         */
+
         btn_speaker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -733,11 +747,13 @@ public class MainActivity extends AppCompatActivity {
                 if (isSpeakerphoneOn) {
                     isSpeakerphoneOn = false;
                     Log.d(TAG, "Speaker OFF");
-                    btn_speaker.setText(R.string.btn_speaker_off);
+                    btn_speaker.setImageResource(R.drawable.mute);
+//                    btn_speaker.setText(R.string.btn_speaker_off);
                 } else {
                     isSpeakerphoneOn = true;
                     Log.d(TAG, "Speaker ON");
-                    btn_speaker.setText(R.string.btn_speaker_on);
+                    btn_speaker.setImageResource(R.drawable.speaker);
+//                    btn_speaker.setText(R.string.btn_speaker_on);
                 }
                 mAudioManager.setSpeakerphoneOn(isSpeakerphoneOn);
             }
@@ -751,6 +767,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        /*
         switchCompat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -771,6 +788,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+         */
 
         spinnerUsers.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -894,6 +913,7 @@ public class MainActivity extends AppCompatActivity {
             TelephonyManager tm = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
             if (tm != null) {
                 String imei = tm.getDeviceId();
+                imei = "35 617509 308401 0";
                 String client = clients.get(imei);
                 if (client != null) {
                     this.currentProfile = client;
@@ -905,12 +925,47 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        callRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+//                Log.i(TAG, "Radio checkedId: " + checkedId);
+                mp3.start();
+                if (checkedId == R.id.groupCallRadioButton) {
+                    mCallType = CallType.GROUP;
+                    spinnerUsers.setVisibility((View.GONE));
+                    spinnerGroups.setVisibility((View.VISIBLE));
+                    spinnerUsers.setEnabled(false);
+                    spinnerGroups.setEnabled(true);
+                } else {
+                    mCallType = CallType.PRIVATE;
+                    spinnerGroups.setVisibility((View.GONE));
+                    spinnerUsers.setVisibility((View.VISIBLE));
+                    spinnerGroups.setEnabled(false);
+                    spinnerUsers.setEnabled(true);
+                }
+            }
+        });
+
         btn_track.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                mp3.start();
                 if (isChecked) {
                     tracking = true;
                 } else {
                     tracking = false;
+                }
+            }
+        });
+
+        btn_emergency.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                mp3.start();
+                if (isChecked) {
+                    mERState = true;
+                    startERState();
+                } else {
+                    mERState = false;
+                    endERState();
                 }
             }
         });
@@ -1089,7 +1144,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-        btn_hangup.setEnabled(true);
+        // btn_hangup.setEnabled(true);
     }
 
     private void showIds(final Context context){
@@ -1247,18 +1302,19 @@ public class MainActivity extends AppCompatActivity {
         text_status.setText(getString(R.string.text_status));
         btn_call.setEnabled(false);
         btn_call.setBackgroundResource(R.color.processing);
-        btn_unregister.setEnabled(false);
-        btn_register.setEnabled(true);
-        btn_er.setEnabled(false);
+//        btn_unregister.setEnabled(false);
+//        btn_register.setEnabled(true);
+//        btn_er.setEnabled(false);
         reg_status.setEnabled(false);
-        switchCompat.setEnabled(false);
-        switch_group.setTextColor(ContextCompat.getColor(this, R.color.background));
-        switch_private.setTextColor(ContextCompat.getColor(this, R.color.background));
+//        switchCompat.setEnabled(false);
+//        switch_group.setTextColor(ContextCompat.getColor(this, R.color.background));
+//        switch_private.setTextColor(ContextCompat.getColor(this, R.color.background));
         spinnerGroups.setEnabled(false);
         spinnerUsers.setEnabled(false);
         btn_speaker.setEnabled(false);
         isSpeakerphoneOn=false;
-        btn_speaker.setText(R.string.btn_speaker_off);
+        btn_speaker.setImageResource(R.drawable.mute);
+//        btn_speaker.setText(R.string.btn_speaker_off);
         registered = false;
         invalidateOptionsMenu();
     }
@@ -1272,16 +1328,16 @@ public class MainActivity extends AppCompatActivity {
         }
         text_info.setText("REGISTERED - MCPTT ID: " + mcpttID + " DISPLAY NAME: " + displayName);
         text_status.setText(displayName);
-        btn_unregister.setEnabled(true);
-        btn_register.setEnabled(false);
-        btn_call.setBackgroundResource(R.drawable.circle_btn);
+//        btn_unregister.setEnabled(true);
+//        btn_register.setEnabled(false);
+        btn_call.setBackgroundResource(R.drawable.roundedcallgreen);
         reg_status.setEnabled(true);
-        btn_er.setEnabled(true);
+//        btn_er.setEnabled(true);
         btn_call.setEnabled(true);
-        switchCompat.setEnabled(true);
-        switchCompat.setChecked(false);
-        switch_group.setTextColor(ContextCompat.getColor(this, R.color.background));
-        switch_private.setTextColor(ContextCompat.getColor(this, R.color.background));
+//        switchCompat.setEnabled(true);
+//        switchCompat.setChecked(false);
+//        switch_group.setTextColor(ContextCompat.getColor(this, R.color.background));
+//        switch_private.setTextColor(ContextCompat.getColor(this, R.color.background));
         spinnerGroups.setEnabled(true);
         spinnerUsers.setEnabled(false);
         spinnerUsers.setVisibility((View.GONE));
@@ -1400,9 +1456,19 @@ public class MainActivity extends AppCompatActivity {
                 });
                 mDialogMenu.show(getSupportFragmentManager(), "SimpleDialog");
                 break;
+            case R.id.action_register:
+                register();
+                break;
+            case R.id.action_help:
+                if (BuildConfig.DEBUG) Log.d(TAG, "Selected Help");
+                mDialogAlert = DialogAlert.newInstance(getHelp(this),
+                        getString(R.string.option_help), false);
+                mDialogAlert.show(getSupportFragmentManager(), "SimpleDialog");
+                break;
             case R.id.action_about:
                 if (BuildConfig.DEBUG) Log.d(TAG, "Selected About");
-                mDialogAlert = DialogAlert.newInstance(getAbout(this), getString(R.string.option_about), false);
+                mDialogAlert = DialogAlert.newInstance(getAbout(this),
+                        getString(R.string.option_about), false);
                 mDialogAlert.show(getSupportFragmentManager(), "SimpleDialog");
                 break;
             case R.id.action_exit:
@@ -1440,6 +1506,17 @@ public class MainActivity extends AppCompatActivity {
         about+="\n"+context.getString(R.string.copyright);
 
         return about;
+    }
+
+    public static String getHelp(Context context) {
+        if (context == null) return "";
+        PackageInfo pInfo = null;
+        String version = null;
+
+        String help = "Trailblazer Help\n";
+
+
+        return help;
     }
     // END GUI
 

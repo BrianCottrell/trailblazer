@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="generator" content="Jekyll v3.8.5">
+        <title>Trailblazer</title>
+        <!-- Bootstrap core CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link href="https://fonts.googleapis.com/css?family=Titillium+Web&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+        <style>
+        /* custom styles here */
+            body {
+                font-family: 'Titillium Web', sans-serif !important;
+            }
+        </style>
+
+        <!-- Custom styles for this template -->
+        <link href="css/styles.css" rel="stylesheet">
+    </head>
+    <body>
+        <!-- <header>
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <div class="container">
+                    <a class="navbar-brand" href="#">Trailblazer</a>
+
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav mr-auto">
+                        <li class="nav-item active">
+                            <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Map</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Views
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="#">Action</a>
+                            <a class="dropdown-item" href="#">Another action</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#">Something else here</a>
+                            </div>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link disabled" href="#">Settings</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="btn btn-primary btn-sm my-2">Start</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="btn btn-secondary btn-sm my-2">Record</a>
+                        </li>
+
+                        </ul>
+                        <form class="form-inline my-2 my-lg-0">
+                        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                        </form>
+                    </div>
+                </div>
+            </nav>
+        </header> -->
+
+        <!-- <main role="main"> -->
+            <span id="ThreeJsCanvas"></span>  
+            <!-- <section class="jumbotron text-center">
+                <div class="container">
+                    <h1 class="jumbotron-heading">Trailblazer</h1>
+                    <p class="lead text-muted">resource mapping application for first responders</p>
+                    <div class="row" style="background: white;
+                    border-radius: 10px;
+                    padding: 20px;">
+                        <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 text-center mx-auto">
+                            <h1>
+                                <i class="material-icons">
+                                    perm_phone_msg
+                                </i>
+                            </h1>
+                            <span>mission critical push to talk</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 text-center mx-auto">
+                            <h1>
+                                <i class="material-icons">
+                                    rss_feed
+                                </i>
+                            </h1>
+                            <span>direct communication</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 text-center mx-auto">
+                            <h1>
+                                <i class="material-icons">
+                                    my_location
+                                </i>
+                            </h1>
+                            <span>track the location of people</span>
+                        </div>
+                    </div>
+                </div>
+            </section> -->
+
+            <div class="container-fluid">
+                <!-- <div class="border-box"> -->
+                    <div class="canvas-drag-drop mx-auto" id="canvas"></div>
+                        
+                    <div class="row d-none">
+
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 text-center mx-auto my-4">
+                            <h5>add markers: </h5>
+                            <!-- green check -->
+                            <img class="mx-4" id="img1" src="https://i.imgur.com/flpFsg4.png" width="30px" draggable="true" />
+                            
+                            <!-- orange question mark -->
+                            <img class="mx-4" id="img2" src="https://i.imgur.com/yeEskID.png" width="30px" draggable="true" />
+
+                            <!-- red caution warning -->
+                            <img class="mx-4" id="img3" src="https://i.imgur.com/d0sIxLS.png" width="30px" draggable="true" />
+                        </div>
+
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 text-center mx-auto my-4 py-2">
+                            <button class="btn btn-primary show-icons">show tags</button>
+                        </div>
+                    </div>
+                <!-- </div> -->
+            </div>
+
+        <!-- </main> -->
+
+        <!-- <footer class="container-fluid text-muted my-5 py-5" style="background: white;">
+            <div class="container">
+                <p class="float-right"><a href="#">Back to top</a></p>
+                <p>© 2019 Trailblazer · <a href="#">Privacy</a> · <a href="#">Terms</a></p>
+            </div>
+        </footer> -->
+
+        <!-- Modal -->
+        <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document" style="margin-top: 200px;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Image</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    </div>
+                    <div class="modal-body">
+                    <img src="img/footprint.jpg" class="img-responsive">
+                    </div>
+                    <div class="modal-footer mx-auto">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Edit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.js" integrity="" crossorigin="anonymous"></script>
+        <!-- <script>window.jQuery || document.write('<script src="/docs/4.3/assets/js/vendor/jquery-slim.min.js"><\/script>')</script><script src="/docs/4.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o" crossorigin="anonymous"></script> -->
+        <!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script> -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+        <script src="js/map.js"></script>
+        <!-- <script src="js/drag-drop.js"></script> -->
+
+        <script>
+            function myMap() {
+                var mapProp= {
+                    center: new google.maps.LatLng(34.2420959, -118.6044138), // 34.052235, -118.243683 , 34.2420959,-118.6044138
+                    zoom:15,
+                };
+                var map = new google.maps.Map(document.getElementById("googleMap"), mapProp);
+            }
+        </script>
+        
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCeMylrl_a0pmIlOGe43xYDYSuQ_fByccA&callback=myMap"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r69/three.min.js"></script>
+        <script>
+            var scene3d = document.getElementById("ThreeJsCanvas");
+            var CANVAS_WIDTH = 1900;
+            var CANVAS_HEIGHT = 900;
+        
+            // SCENE
+            var scene_header = new THREE.Scene();
+        
+            // CAMERA
+            camera_header = new THREE.PerspectiveCamera(75, CANVAS_WIDTH / CANVAS_HEIGHT, 0.1, 1000);
+            camera_header.position.set(0, 0, 150);
+            camera_header.lookAt(scene_header.position);
+        
+            // RENDERER
+            // transparent div background color
+            var renderer_header = new THREE.WebGLRenderer( { alpha: true } );
+            renderer_header.setClearColor( 0x000000, 0 );
+            renderer_header.setSize(CANVAS_WIDTH, CANVAS_HEIGHT);
+        
+            // GEOMETRY & MATERIALS
+            // outlined sphere
+            var geometry_sphere1 = new THREE.SphereGeometry( 80, 80, 80, 5, 5, 5 );
+            var material_phong_outlined = new THREE.MeshPhongMaterial({
+                color: 0xffffff,
+                shininess:30,
+                opacity: 0.4,
+                specular: 0xeeeeee,
+                wireframe: true
+            });
+        
+            var cube_outlined = new THREE.Mesh(geometry_sphere1, material_phong_outlined);
+            scene_header.add(cube_outlined);
+            cube_outlined.castShadow = true;
+            cube_outlined.receiveShadow = true;
+            material_phong_outlined.transparent=true;
+        
+            cube_outlined.position.y = -40;
+            cube_outlined.rotation.y = 15;
+        
+            // materials
+            var lambertMaterial = new THREE.MeshLambertMaterial({
+                opacity: 0.1,
+                color: 0x50acfd
+            });
+            lambertMaterial.transparent=true;
+        
+            var color = new THREE.Color( "#50acfd" );
+            var material_phong_shiny = new THREE.MeshPhongMaterial( {
+                color: color.getHex(),
+                // opacity: 0.9,
+                specular: 0xffffff,
+                shinyness: 100
+            } );
+        
+            //torus
+            var geometry_torus = new THREE.TorusKnotGeometry( 0, 80, 80);
+            var geometry_otherTorus = new THREE.TorusKnotGeometry( 40, 3.5, 100, 10 );
+        
+            var mesh_otherTorus = new THREE.Mesh( geometry_torus, lambertMaterial );
+            var mesh_mesh_outline = new THREE.Mesh( geometry_torus, material_phong_outlined );
+        
+            scene_header.add( mesh_otherTorus );
+            scene_header.add( mesh_mesh_outline );
+        
+            // brighter lights
+            var ambientLight = new THREE.AmbientLight( 0x5bd7c4 );
+            scene_header.add( ambientLight );
+        
+            var lights_header = [];
+            lights_header[ 0 ] = new THREE.PointLight( 0xe90269, 1, 0 );
+            lights_header[ 1 ] = new THREE.PointLight( 0xe90269, 1, 0 );
+            lights_header[ 2 ] = new THREE.PointLight( 0x02f1ff, 1, 0 );
+        
+            lights_header[ 0 ].position.set( 0, 200, 0 );
+            lights_header[ 1 ].position.set( 100, 200, 100 );
+            lights_header[ 2 ].position.set( - 100, - 200, - 100 );
+        
+            scene_header.add( lights_header[ 0 ] );
+            scene_header.add( lights_header[ 1 ] );
+            scene_header.add( lights_header[ 2 ] );
+        
+            // light cast shadows
+            lights_header[ 0 ].castShadow = true;
+            lights_header[ 1 ].castShadow = true;
+            lights_header[ 2 ].castShadow = true;
+        
+            // FINISH SCENE SETUP
+            // document.body.appendChild(scene3d.domElement);
+            ThreeJsCanvas.appendChild(renderer_header.domElement);
+            // renderer.render(scene, camera);
+            var render = function () {
+                requestAnimationFrame(render);
+                cube_outlined.rotation.y -= 0.001;
+                mesh_mesh_outline.rotation.y -= 0.001;
+                mesh_otherTorus.rotation.y -= 0.001;
+                renderer_header.render(scene_header, camera_header);
+            };
+            render();
+        </script>
+    </body>
+</html>
+

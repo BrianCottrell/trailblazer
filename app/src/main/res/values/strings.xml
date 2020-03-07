@@ -26,6 +26,8 @@
     <string name="option_eMBMS">Select eMBMS MW</string>
     <string name="option_registration">Select IdMS/CMS</string>
     <string name="option_auto_reg">Auto-Registration</string>
+    <string name="option_help">Help</string>
+    <string name="option_register">Register</string>
     <string name="option_about">About</string>
     <string name="option_exit">Exit</string>
 

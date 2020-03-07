@@ -13,8 +13,13 @@ public class MapActivity extends Activity {
         setContentView(R.layout.activity_map);
 
         webView = (WebView) findViewById(R.id.webView1);
+        webView.getSettings().setAllowFileAccess(true);
+        webView.getSettings().setAllowFileAccessFromFileURLs(true);
+        webView.getSettings().setAllowUniversalAccessFromFileURLs(true);
         webView.getSettings().setJavaScriptEnabled(true);
-        webView.loadUrl("http://thawing-ocean-92153.herokuapp.com/map");
+        // webView.loadUrl("http://thawing-ocean-92153.herokuapp.com/map");
+
+        webView.loadUrl("file:///android_asset/web/map.html");
 
     }
 

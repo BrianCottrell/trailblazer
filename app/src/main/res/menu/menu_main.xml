@@ -14,11 +14,20 @@
         android:orderInCategory="400"
         app:showAsAction="never"/>
 
+    <item android:id="@+id/action_register"
+        android:title="@string/option_register"
+        android:orderInCategory="401"
+        app:showAsAction="never"/>
+
     <item android:id="@+id/action_about"
         android:title="@string/option_about"
         android:orderInCategory="500"
         app:showAsAction="never"/>
 
+    <item
+        android:id="@+id/action_help"
+        android:orderInCategory="501"
+        android:title="@string/option_help" />
     <item android:id="@+id/action_exit"
         android:title="@string/option_exit"
         android:orderInCategory="600"

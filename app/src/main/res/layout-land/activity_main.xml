@@ -163,7 +163,7 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/btn_register"
+                android:id="@+id/btn_groupcall"
                 android:layout_width="85dp"
                 android:layout_height="85dp"
                 android:layout_marginLeft="10dp"
@@ -174,7 +174,7 @@
                 android:textSize="10sp" />
 
             <Button
-                android:id="@+id/btn_unregister"
+                android:id="@+id/btn_privatecall"
                 android:layout_width="85dp"
                 android:layout_height="85dp"
                 android:layout_marginLeft="10dp"
@@ -196,7 +196,7 @@
                 android:textSize="10sp" />
 
             <Button
-                android:id="@+id/btn_speaker"
+                android:id="@+id/btn_speaker2"
                 android:layout_width="85dp"
                 android:layout_height="85dp"
                 android:layout_marginLeft="10dp"
@@ -319,7 +319,7 @@
                 android:text="Tracking" />
 
             <ToggleButton
-                android:id="@+id/trackingButton"
+                android:id="@+id/trackingButton2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
