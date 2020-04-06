@@ -23,11 +23,12 @@ package org.test.client.mcopclient;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -42,15 +43,25 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
+import android.os.Vibrator;
 import android.provider.Settings;
-import android.support.design.widget.AppBarLayout;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.SwitchCompat;
-import android.support.v7.widget.Toolbar;
+import android.speech.RecognizerIntent;
+import android.speech.tts.TextToSpeech;
+
+
+//import android.support.design.widget.AppBarLayout;
+//import android.support.v4.app.ActivityCompat;
+//import android.support.v4.content.ContextCompat;
+//import android.support.v7.app.AppCompatActivity;
+//import android.support.v7.widget.Toolbar;
+
+import android.support.v4.app.*;
+
 import android.telephony.TelephonyManager;
+import android.text.InputType;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -60,12 +71,21 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+//import android.widget.Toolbar;
+
+//import com.google.android.material.appbar.AppBarLayout;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentManager;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -73,6 +93,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.material.appbar.AppBarLayout;
+//import com.google.android.material.appbar.AppBarLayout;
 
 import org.mcopenplatform.muoapi.IMCOPCallback;
 import org.mcopenplatform.muoapi.IMCOPsdk;
@@ -81,18 +103,20 @@ import org.test.client.mcopclient.preference.PreferencesManagerDefault;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity { // AppCompatActivity {
     private final static String TAG = MainActivity.class.getCanonicalName();
+    private static final int VOICE_RECOGNITION_REQUEST_CODE = 1234;
 
     private ServiceConnection mConnection;
     private IMCOPsdk mService;
@@ -109,17 +133,23 @@ public class MainActivity extends AppCompatActivity {
     private static final String ACTION_BUTTON_PTT_UP_BITTIUM = "com.elektrobit.pttbutton.PTTBUTTON_UP";
     private static final String ACTION_BUTTON_PTT_LONG_PRESS_BITTIUM = "com.elektrobit.pttbutton.PTTBUTTON_LONG_PRESS";
     private BroadcastReceiver mButtonPTTBroadCastRecvMCPTT;
+    private Vibrator vibrator;
+    private AlertDialog builder;
 
-//    private Button btn_register;
+    private TextToSpeech tts;
+
+
+    //    private Button btn_register;
 //    private Button btn_unregister;
     private TextView text_info;
     private TextView text_error;
     private TextView text_affiliation;
     private TextView text_status;
+    private TextView text_heading;
     // private Button btn_hangup;
     private DialogMenu mDialogIds;
     private DialogAlert mDialogAlert;
-    private Button btn_accept;
+//    private Button btn_accept;
     private Button reg_status;
     private Button reg_eMBMS;
     private ImageButton btn_call;
@@ -130,7 +160,6 @@ public class MainActivity extends AppCompatActivity {
 //    private TextView switch_private;
 //    private TextView switch_group;
     private Toolbar toolbar;
-    private TextView text_emergency;
     private RadioGroup callRadioGroup;
     private Button btn_map;
     private Switch btn_track;
@@ -149,6 +178,7 @@ public class MainActivity extends AppCompatActivity {
     private Spinner spinnerUsers;
     private MenuItem itemIdMSCSM;
     private MenuItem itemAutoReg;
+    private MenuItem itemRegister;
     private MenuItem itemExit;
     private Boolean isSpeakerphoneOn;
     private ArrayList<String> groupsCurrent;
@@ -159,7 +189,10 @@ public class MainActivity extends AppCompatActivity {
     private boolean autoRegister = false;
     private boolean registered = false;
     private boolean tracking = false;
+    private TextView text_tracking;
     private boolean emergency = false;
+    private boolean doingVoice = false;
+    private boolean forceCall = false;
 
     private enum State {
         GRANTED,
@@ -177,16 +210,17 @@ public class MainActivity extends AppCompatActivity {
 
     private CallType mCallType = CallType.GROUP;
     private boolean mERState = false;
-    private String selGroup = "sip:DEMO_group@organization.org";
-    private String selUser = "sip:mcptt_id_DEMO_A@organization.org";
+    private String selGroup = "sip:ta_group@organization.org";
+    private String selUser = "sip:mcptt-ta-A@organization.org";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setPermissions();
-
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         toolbar = (Toolbar) findViewById(R.id.screen_menu_toolbar);
+//        setActionBar(toolbar);
         setSupportActionBar(toolbar);
 //        btn_register = (Button) findViewById(R.id.btn_groupcall);
 //        btn_unregister = (Button) findViewById(R.id.btn_privatecall);
@@ -194,8 +228,9 @@ public class MainActivity extends AppCompatActivity {
         text_error = (TextView) findViewById(R.id.text_error);
         text_affiliation = (TextView) findViewById(R.id.text_affiliation);
         text_status = (TextView) findViewById(R.id.text_status);
+        text_heading = (TextView) findViewById(R.id.text_heading);
         // btn_hangup = (Button) findViewById(R.id.btn_hangup);
-        btn_accept = (Button) findViewById(R.id.btn_accept);
+//        btn_accept = (Button) findViewById(R.id.btn_accept);
         reg_status = (Button) findViewById(R.id.reg_status);
         reg_eMBMS = (Button) findViewById(R.id.reg_eMBMS);
         btn_call = (ImageButton) findViewById(R.id.btn_call);
@@ -208,16 +243,18 @@ public class MainActivity extends AppCompatActivity {
 //        switchCompat = (SwitchCompat) findViewById(R.id.switch_call);
         spinnerGroups = (Spinner) findViewById(R.id.spinnerGroups);
         spinnerUsers = (Spinner) findViewById(R.id.spinnerUsers);
-        text_emergency = (TextView) findViewById(R.id.emergency);
+        text_heading = (TextView) findViewById(R.id.text_heading);
         btn_map = (Button) findViewById(R.id.mapButton);
         btn_track = (Switch) findViewById(R.id.trackingButton);
+        text_tracking = (TextView) findViewById(R.id.text_tracking);
+
         btn_emergency = (Switch) findViewById(R.id.emergencyButton);
         callRadioGroup = (RadioGroup) findViewById(R.id.callRadioGroup);
 
 //        btn_unregister.setEnabled(false);
-        btn_call.setEnabled(false);
+//        btn_call.setEnabled(false);
 //        btn_register.setEnabled(true);
-        btn_accept.setEnabled(false);
+//        btn_accept.setEnabled(false);
 //        btn_hangup.setEnabled(false);
         reg_status.setEnabled(false);
         reg_eMBMS.setEnabled(false);
@@ -239,6 +276,16 @@ public class MainActivity extends AppCompatActivity {
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         mAudioManager.setSpeakerphoneOn(isSpeakerphoneOn);
 
+        tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if(status != TextToSpeech.ERROR) {
+                    tts.setLanguage(Locale.US);
+                }
+            }
+        });
+
+
         //Dissable logging messages. Enable just for debugging
         text_info.setVisibility((View.GONE));
         text_error.setVisibility((View.GONE));
@@ -250,11 +297,12 @@ public class MainActivity extends AppCompatActivity {
 
         // User list
         // EDIT THIS LIST WITH THE PROVIDED USERNAMES
-        usersCurrent.add("sip:mcptt-t2p-A@organization.org");
-        usersCurrent.add("sip:mcptt-t2p-B@organization.org");
-        usersCurrent.add("sip:mcptt-t2p-C@organization.org");
-        usersCurrent.add("sip:mcptt-t2p-D@organization.org");
-        usersCurrent.add("sip:mcptt-t2p-E@organization.org");
+        usersCurrent.add("sip:mcptt-ta-A@organization.org");
+        usersCurrent.add("sip:mcptt-ta-B@organization.org");
+        usersCurrent.add("sip:mcptt-ta-C@organization.org");
+        usersCurrent.add("sip:mcptt-ta-D@organization.org");
+        usersCurrent.add("sip:mcptt-ta-E@organization.org");
+        usersCurrent.add("Add User");
 
         // Group list
         // EDIT THIS LIST WITH THE PROVIDED GROUP NAME(s)
@@ -262,7 +310,7 @@ public class MainActivity extends AppCompatActivity {
         groupsCurrent.add("sip:ttp_group@organization.org");
 
         // Adapter for User Spinner
-        ArrayAdapter<String> userAdaptor = new ArrayAdapter<>(getApplicationContext(),
+        final ArrayAdapter<String> userAdaptor = new ArrayAdapter<>(getApplicationContext(),
                 android.R.layout.simple_spinner_item, usersCurrent);
         // Drop down layout style - list view with radio button
         userAdaptor.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -277,7 +325,7 @@ public class MainActivity extends AppCompatActivity {
 
         loadConfiguration();
 
-        if (userData == null) ;
+//        if (userData == null) ;
         userData = new UserData();
 
         final MediaPlayer mp1 = MediaPlayer.create(getApplicationContext(), R.raw.ring);
@@ -344,6 +392,7 @@ public class MainActivity extends AppCompatActivity {
                                                         Log.d(TAG, "Login success: " + success + " mcptt_id: " + mcptt_id);
                                                     displayName = action.getStringExtra(ConstantsMCOP.LoginEventExtras.DISPLAY_NAME);
                                                     isRegisted(success, mcptt_id, displayName);
+                                                    text_heading.setText(emergency ? "EMERGENCY" : "NOMINAL");
                                                 } else {
                                                     Log.e(TAG, "Error: Registration process");
                                                 }
@@ -509,7 +558,8 @@ public class MainActivity extends AppCompatActivity {
                                                             Log.d(TAG, "TOKEN GRANTED");
                                                             int durationGranted = action.getIntExtra(ConstantsMCOP.FloorControlEventExtras.DURATION_TOKEN, ERROR_CODE_DEFAULT);
                                                             showData("floorControl (" + sessionID + ")", " granted " + "-> Duration: " + durationGranted);
-                                                            btn_call.setBackgroundResource(R.color.registered);
+                                                            btn_call.setBackgroundResource(R.drawable.roundedcallgreen);
+//                                                            btn_call.setBackgroundResource(R.color.registered);
                                                             mState = State.GRANTED;
                                                             btn_call.setEnabled(true);
 //                                                            btn_hangup.setEnabled(true);
@@ -517,7 +567,8 @@ public class MainActivity extends AppCompatActivity {
                                                         case idle:
                                                             Log.d(TAG, "TOKEN IDLE");
                                                             showData("floorControl (" + sessionID + ")", " idle");
-                                                            btn_call.setBackgroundResource(R.color.cardview_light_background);
+//                                                            btn_call.setBackgroundResource(R.color.cardview_light_background);
+                                                            btn_call.setBackgroundResource(R.drawable.roundedcallpressed);
                                                             mState = State.IDLE;
                                                             btn_call.setEnabled(true);
 //                                                            btn_hangup.setEnabled(true);
@@ -533,7 +584,8 @@ public class MainActivity extends AppCompatActivity {
                                                             mState = State.TAKEN;
                                                             btn_call.setEnabled(false);
 //                                                            btn_hangup.setEnabled(true);
-                                                            btn_call.setBackgroundResource(R.color.unregistered);
+//                                                            btn_call.setBackgroundResource(R.color.unregistered);
+                                                            btn_call.setBackgroundResource(R.drawable.roundedcallred);
                                                             text_talking.setVisibility((View.VISIBLE));
                                                             text_callingid.setVisibility((View.VISIBLE));
                                                             text_callingid.setText(userIDTaken);
@@ -712,6 +764,7 @@ public class MainActivity extends AppCompatActivity {
         });
         */
 
+        /*
         btn_accept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -719,7 +772,7 @@ public class MainActivity extends AppCompatActivity {
                 //showIdsAcceptCall(getApplicationContext());
             }
         });
-
+        */
         /*
         btn_er.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -737,6 +790,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
          */
+
 
         btn_speaker.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -762,7 +816,8 @@ public class MainActivity extends AppCompatActivity {
         btn_map.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), MapActivity.class);
+                Intent intent = new Intent(getApplicationContext(), MapsMarkerActivity.class);
+//                Intent intent = new Intent(getApplicationContext(), MapActivity.class);
                 startActivity(intent);
             }
         });
@@ -794,7 +849,43 @@ public class MainActivity extends AppCompatActivity {
         spinnerUsers.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selUser = parent.getItemAtPosition(position).toString();
+                String user = parent.getItemAtPosition(position).toString();
+                if (user.equals("Add User")) {
+//                    addUser(getApplicationContext(), userAdaptor);
+
+//                    builder = new AlertDialog.Builder(MainActivity.this).create();
+//                    builder = new AlertDialog.Builder(getApplicationContext());
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+                    builder.setTitle("Add User");
+                    final EditText input = new EditText(getApplicationContext());
+//                    input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                    input.setInputType(InputType.TYPE_CLASS_TEXT);
+                    builder.setView(input);
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            String u_Text = input.getText().toString();
+//                            usersCurrent.add("Add User");
+                            int cnt = userAdaptor.getCount();
+                            userAdaptor.insert(u_Text,cnt - 1);
+                            selUser = u_Text;
+                        }
+                    });
+                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
+
+                    builder.show();
+
+
+
+                } else {
+                    selUser = user;
+                }
             }
 
             @Override
@@ -815,23 +906,49 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
         btn_call.setOnTouchListener(new View.OnTouchListener() {
+
+            public void startVoiceRecognitionActivity() {
+                doingVoice = true;
+                Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
+                        "Trailblazer");
+                startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE);
+            }
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                mp1.start();
                 if (mState != State.NONE && event.getAction() == MotionEvent.ACTION_DOWN) {
+                    if (!registered) {
+                        startVoiceRecognitionActivity();
+                        return true;
+                    }
                     if (mState == State.IDLE) {
+                        mp3.start();
                         //Request token
                         Log.d(TAG, "TOKEN REQUEST");
                         showIdsOperationFloorControl(getApplicationContext(), true);
                     }
                 } else if (mState != State.NONE && event.getAction() == MotionEvent.ACTION_UP) {
+                    if (!registered) {
+                        doingVoice = false;
+                        return true;
+                    }
                     if (mState == State.GRANTED) {
                         //Release token
                         Log.d(TAG, "TOKEN RELEASE");
                         showIdsOperationFloorControl(getApplicationContext(), false);
                     }
                 } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    if (!registered) {
+                        startVoiceRecognitionActivity();
+                        return true;
+                    }
+                    mp3.start();
+                    vibrator.vibrate(100);
                     makeCall();
                 }
                 return true;
@@ -953,6 +1070,7 @@ public class MainActivity extends AppCompatActivity {
                     tracking = true;
                 } else {
                     tracking = false;
+                    text_tracking.setText("Tracking");
                 }
             }
         });
@@ -976,12 +1094,12 @@ public class MainActivity extends AppCompatActivity {
                 sendLocation();
             }
         }, 0, 2000);
+
     }
 
 
-
     private void sendLocation() {
-        if (tracking) {
+        if (tracking ) {
             LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
@@ -994,8 +1112,23 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if (location == null) {
+                location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                if (location == null) { return; }
+            }
             double longitude = location.getLongitude();
             double latitude = location.getLatitude();
+
+            DecimalFormat df = new DecimalFormat("0.000000");
+            final String tt = "Tracking : "+df.format(latitude)+" , "+df.format(longitude);
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d("UI thread", "I am the UI thread");
+                    text_tracking.setText(tt);
+                }
+            });
+
             Uri uri = new Uri.Builder()
                     .scheme("http")
                     .authority("trailblazerapp.herokuapp.com")
@@ -1011,6 +1144,7 @@ public class MainActivity extends AppCompatActivity {
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
+                            Log.i(TAG,response);
                         }
                     }, new Response.ErrorListener() {
                 @Override
@@ -1033,18 +1167,87 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void addUser(Context context, final ArrayAdapter<String> userAdaptor) {
+
+        /*
+        final android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(getActivity());
+
+        String titleComplete="options";
+        if(title!=null){
+            titleComplete+="("+title+")";
+        }
+
+        builder.setTitle(titleComplete)
+                .setItems(items, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int item) {
+                        if(onClickItemListener!=null)onClickItemListener.onClickItem(item);
+                    }
+                });
+
+        builder.create();
+
+         */
+
+
+        /*
+        mDialogIds = DialogMenu.newInstance(strings, null);
+        mDialogIds.setOnClickItemListener(new DialogMenu.OnClickListener() {
+            @Override
+            public void onClickItem(int item) {
+                if (item >= 0 && strings.length > item) {
+                    try {
+                        if (mService != null)
+                            mService.hangUpCall(strings[item]);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        mDialogIds.show(getSupportFragmentManager(), "SimpleDialog");
+
+         */
+
+/*
+        builder = new AlertDialog.Builder(context);
+        builder.setTitle("Title");
+        final EditText input = new EditText(context);
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        builder.setView(input);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String u_Text = input.getText().toString();
+//                            usersCurrent.add("Add User");
+                int cnt = userAdaptor.getCount();
+                userAdaptor.insert(u_Text,cnt - 2);
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+*/
+    }
+
     private void register() {
         if (IdMSCMS) {
             try {
-                if(mService!=null)
+                if (mService!=null) {
                     mService.loginMCOP();
+                }
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
         } else { // CMS
             try {
-                if(mService!=null)
+                if (mService!=null) {
                     mService.authorizeUser(null);
+                }
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
@@ -1063,23 +1266,29 @@ public class MainActivity extends AppCompatActivity {
     private void startERState() {
         // Start Emergency State
         Log.d(TAG,"Start Emergency State");
+        emergency = true;
         Toolbar toolbar = (Toolbar) findViewById(R.id.screen_menu_toolbar);
+//        setActionBar(toolbar);
         setSupportActionBar(toolbar);
         toolbar.setBackgroundColor(getResources().getColor(R.color.colorER));
-        AppBarLayout appbarLayout = (AppBarLayout) findViewById(R.id.screen_menu_toolbar_AppBarLayout);
-        appbarLayout.setBackgroundColor(getResources().getColor(R.color.colorER));
-        text_emergency.setTextColor(getResources().getColor(R.color.colorER));
+//        AppBarLayout appbarLayout = (AppBarLayout) findViewById(R.id.screen_menu_toolbar_AppBarLayout);
+//        appbarLayout.setBackgroundColor(getResources().getColor(R.color.colorER));
+        text_heading.setTextColor(getResources().getColor(R.color.colorER));
+        text_heading.setText("EMERGENCY");
     }
 
     private void endERState() {
         // End Emergency State
         Log.d(TAG,"End Emergency State");
+        emergency = false;
         Toolbar toolbar = (Toolbar) findViewById(R.id.screen_menu_toolbar);
+//        setActionBar(toolbar);
         setSupportActionBar(toolbar);
         toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        AppBarLayout appbarLayout = (AppBarLayout) findViewById(R.id.screen_menu_toolbar_AppBarLayout);
-        appbarLayout.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        text_emergency.setTextColor(getResources().getColor(R.color.background));
+//        AppBarLayout appbarLayout = (AppBarLayout) findViewById(R.id.screen_menu_toolbar_AppBarLayout);
+//        appbarLayout.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+        text_heading.setTextColor(getResources().getColor(R.color.background));
+        text_heading.setText(registered ? "NOMINAL" : "OFFLINE");
     }
 
     private void makeCall(){
@@ -1089,12 +1298,15 @@ public class MainActivity extends AppCompatActivity {
                 // Group Call
                 try {
                     Log.d(TAG,"Call type: " + mCallType);
-                    if(mService!=null)
+                    if(mService!=null) {
+                        if (forceCall) { speak("Calling "+selGroup); }
+
                         mService.makeCall(
                                 selGroup, //DEFAULT_GROUP,
                                 ConstantsMCOP.CallEventExtras.CallTypeEnum.Audio.getValue() |
                                         ConstantsMCOP.CallEventExtras.CallTypeEnum.WithFloorCtrl.getValue() |
                                         ConstantsMCOP.CallEventExtras.CallTypeEnum.PrearrangedGroup.getValue());
+                    }
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
@@ -1102,12 +1314,14 @@ public class MainActivity extends AppCompatActivity {
                 // Private Call
                 try {
                     Log.d(TAG,"Call type: " + mCallType);
-                    if(mService!=null)
+                    if(mService!=null) {
+                        if (forceCall) { speak("Calling "+selUser); }
                         mService.makeCall(
                                 selUser, //DEFAULT_PRIVATE_CALL,
                                 ConstantsMCOP.CallEventExtras.CallTypeEnum.Audio.getValue() |
                                         ConstantsMCOP.CallEventExtras.CallTypeEnum.WithFloorCtrl.getValue() |
                                         ConstantsMCOP.CallEventExtras.CallTypeEnum.Private.getValue());
+                    }
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
@@ -1118,13 +1332,15 @@ public class MainActivity extends AppCompatActivity {
                 // Emergency Group Call
                 try {
                     Log.d(TAG,"Call type: Emergency " + mCallType);
-                    if(mService!=null)
+                    if(mService!=null) {
+                        if (forceCall) { speak("Calling "+selGroup); }
                         mService.makeCall(
                                 selGroup, //DEFAULT_GROUP,
                                 ConstantsMCOP.CallEventExtras.CallTypeEnum.Audio.getValue() |
                                         ConstantsMCOP.CallEventExtras.CallTypeEnum.WithFloorCtrl.getValue() |
                                         ConstantsMCOP.CallEventExtras.CallTypeEnum.PrearrangedGroup.getValue() |
                                         ConstantsMCOP.CallEventExtras.CallTypeEnum.Emergency.getValue());
+                    }
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
@@ -1132,13 +1348,15 @@ public class MainActivity extends AppCompatActivity {
                 // Private Call
                 try {
                     Log.d(TAG,"Call type: Emergency " + mCallType);
-                    if(mService!=null)
+                    if(mService!=null) {
+                        if (forceCall) { speak("Calling "+selUser); }
                         mService.makeCall(
                                 selUser, //DEFAULT_PRIVATE_CALL,
                                 ConstantsMCOP.CallEventExtras.CallTypeEnum.Audio.getValue() |
                                         ConstantsMCOP.CallEventExtras.CallTypeEnum.WithFloorCtrl.getValue() |
                                         ConstantsMCOP.CallEventExtras.CallTypeEnum.Private.getValue() |
                                         ConstantsMCOP.CallEventExtras.CallTypeEnum.Emergency.getValue());
+                    }
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
@@ -1176,7 +1394,12 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             });
-            mDialogIds.show(getSupportFragmentManager(), "SimpleDialog");
+//            mDialogIds.show(getSupportFragmentManager(), "SimpleDialog");
+//            getFragmentManager();
+
+//            getActivity().getSupportFragmentManager();
+
+            mDialogIds.show(getFragmentManager(), "SimpleDialog");
         }
     }
 
@@ -1219,7 +1442,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             });
-            mDialogIds.show(getSupportFragmentManager(), "SimpleDialog");
+//            mDialogIds.show(getSupportFragmentManager(), "SimpleDialog");
+            mDialogIds.show(getFragmentManager(), "SimpleDialog");
         }
         return true;
     }
@@ -1230,8 +1454,10 @@ public class MainActivity extends AppCompatActivity {
         if(strings==null)return;
         try {
             if(mService!=null)
+                vibrator.vibrate(100);
                 mService.acceptCall(sessionID);
-                btn_call.setBackgroundResource(R.color.unregistered);
+                btn_call.setBackgroundResource(R.drawable.roundedcallred);
+//                btn_call.setBackgroundResource(R.color.unregistered);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -1253,40 +1479,61 @@ public class MainActivity extends AppCompatActivity {
         mConnection=null;
     }
 
+    void speak(String toSpeak) {
+        Toast.makeText(getApplicationContext(), toSpeak,Toast.LENGTH_SHORT).show();
+        tts.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null, "Registering");
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode){
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == VOICE_RECOGNITION_REQUEST_CODE && resultCode == RESULT_OK) {
+            if (!doingVoice) {
+                return;
+            }
+            ArrayList<String> matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+//            mList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, matches));
+            Log.i(TAG, TextUtils.join(" , ", matches));
+            if (matches.contains("call")) {
+                forceCall = true;
+                speak("Registering");
+                register();
+            }
+            return;
+        }
+
+        switch (requestCode) {
             case AUTHETICATION_RESULT:
-                if ( resultCode == ScreenAuthenticationWebView.RETURN_ON_AUTHENTICATION_LISTENER_FAILURE) {
+                if (resultCode == ScreenAuthenticationWebView.RETURN_ON_AUTHENTICATION_LISTENER_FAILURE) {
                     String dataError;
                     if (data != null &&
-                            (dataError= data.getStringExtra(org.test.client.mcopclient.ScreenAuthenticationWebView.RETURN_ON_AUTHENTICATION_ERROR))!=null &&
+                            (dataError = data.getStringExtra(ScreenAuthenticationWebView.RETURN_ON_AUTHENTICATION_ERROR)) != null &&
                             dataError instanceof String) {
-                        Log.e(TAG,"Authentication Error: "+dataError);
-                    }else{
-                        Log.e(TAG,"Error processing authentication.");
+                        Log.e(TAG, "Authentication Error: " + dataError);
+                    } else {
+                        Log.e(TAG, "Error processing authentication.");
                     }
-                }else if ( resultCode == ScreenAuthenticationWebView.RETURN_ON_AUTHENTICATION_LISTENER_OK) {
+                } else if (resultCode == ScreenAuthenticationWebView.RETURN_ON_AUTHENTICATION_LISTENER_OK) {
                     String dataUri;
                     if (data != null &&
-                            (dataUri= data.getStringExtra(org.test.client.mcopclient.ScreenAuthenticationWebView.RETURN_ON_AUTHENTICATION_RESPONSE))!=null &&
+                            (dataUri = data.getStringExtra(ScreenAuthenticationWebView.RETURN_ON_AUTHENTICATION_RESPONSE)) != null &&
                             dataUri instanceof String) {
                         URI uri = null;
                         try {
                             uri = new URI(dataUri);
                             Log.i(TAG, "Uri: " + uri.toString());
                             try {
-                                if(mService!=null)
+                                if (mService != null)
                                     mService.authorizeUser(dataUri);
                             } catch (RemoteException e) {
                                 e.printStackTrace();
                             }
                         } catch (URISyntaxException e) {
-                            Log.e(TAG,"Authentication Error: "+e.getMessage());
+                            Log.e(TAG, "Authentication Error: " + e.getMessage());
                             e.printStackTrace();
                         }
-                    }else{
-                        Log.e(TAG,"Error processing file to import profiles.");
+                    } else {
+                        Log.e(TAG, "Error processing file to import profiles.");
                     }
                 }
                 break;
@@ -1298,10 +1545,11 @@ public class MainActivity extends AppCompatActivity {
         userData.setRegisted(false);
         userData.setDisplayName(null);
         userData.setMcpttID(null);
-        text_info.setText("UNREGISTERED");
+        text_info.setText("----");
         text_status.setText(getString(R.string.text_status));
-        btn_call.setEnabled(false);
-        btn_call.setBackgroundResource(R.color.processing);
+        text_heading.setText(emergency ? "EMERGENCY" : "OFFLINE");
+//        btn_call.setEnabled(false);
+//        btn_call.setBackgroundResource(R.color.processing);
 //        btn_unregister.setEnabled(false);
 //        btn_register.setEnabled(true);
 //        btn_er.setEnabled(false);
@@ -1331,9 +1579,9 @@ public class MainActivity extends AppCompatActivity {
 //        btn_unregister.setEnabled(true);
 //        btn_register.setEnabled(false);
         btn_call.setBackgroundResource(R.drawable.roundedcallgreen);
+        btn_call.setEnabled(true);
         reg_status.setEnabled(true);
 //        btn_er.setEnabled(true);
-        btn_call.setEnabled(true);
 //        switchCompat.setEnabled(true);
 //        switchCompat.setChecked(false);
 //        switch_group.setTextColor(ContextCompat.getColor(this, R.color.background));
@@ -1345,6 +1593,43 @@ public class MainActivity extends AppCompatActivity {
         btn_speaker.setEnabled(true);
         registered = true;
         invalidateOptionsMenu();
+
+        if (forceCall) {
+            /*
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    //Do something after 100ms
+                    Log.i(TAG,"Make Call: "+selGroup);
+                    makeCall();
+                }
+            }, 4000);
+             */
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    // this code will be executed after 2 seconds
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.d("UI thread", "I am the UI thread");
+                            Log.i(TAG,"Make Call: "+selGroup);
+                            makeCall();
+                        }
+                    });
+                    /*
+                    MainActivity.this.myView.post(new Runnable() {
+                        public void run() {
+                            Log.d("UI thread", "I am the UI thread");
+                            Log.i(TAG,"Make Call: "+selGroup);
+                            makeCall();
+                        }
+                    });
+                     */
+                }
+            }, 8000);
+        }
     }
 
     private void showData(String eventType, String data){
@@ -1391,6 +1676,7 @@ public class MainActivity extends AppCompatActivity {
         itemIdMSCSM = menu.findItem(R.id.action_registration);
         itemAutoReg = menu.findItem(R.id.action_auto_reg);
         itemExit = menu.findItem(R.id.action_exit);
+        itemRegister = menu.findItem(R.id.action_register);
         if (registered) {
             itemIdMSCSM.setVisible(false);
             itemAutoReg.setVisible(false);
@@ -1401,6 +1687,16 @@ public class MainActivity extends AppCompatActivity {
             itemExit.setVisible(true);
         }
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (registered) {
+            itemRegister.setTitle("Unregister");
+        } else {
+            itemRegister.setTitle("Register");
+        }
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -1432,7 +1728,8 @@ public class MainActivity extends AppCompatActivity {
                         saveConfiguration();
                     }
                 });
-                mDialogMenu.show(getSupportFragmentManager(), "SimpleDialog");
+//                mDialogMenu.show(getSupportFragmentManager(), "SimpleDialog");
+                mDialogMenu.show(getFragmentManager(), "SimpleDialog");
                 break;
             case R.id.action_auto_reg:
                 if (BuildConfig.DEBUG) Log.d(TAG, "Selected Auto-Registration");
@@ -1454,22 +1751,37 @@ public class MainActivity extends AppCompatActivity {
                         saveConfiguration();
                     }
                 });
-                mDialogMenu.show(getSupportFragmentManager(), "SimpleDialog");
+//                mDialogMenu.show(getSupportFragmentManager(), "SimpleDialog");
+                mDialogMenu.show(getFragmentManager(), "SimpleDialog");
                 break;
             case R.id.action_register:
-                register();
+                if (registered) {
+                    try {
+                        if (mService != null) {
+                            mService.unLoginMCOP();
+                        }
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+
+                } else {
+                    register();
+                }
+                invalidateOptionsMenu();
                 break;
             case R.id.action_help:
                 if (BuildConfig.DEBUG) Log.d(TAG, "Selected Help");
                 mDialogAlert = DialogAlert.newInstance(getHelp(this),
                         getString(R.string.option_help), false);
-                mDialogAlert.show(getSupportFragmentManager(), "SimpleDialog");
+//                mDialogAlert.show(getSupportFragmentManager(), "SimpleDialog");
+                mDialogAlert.show(getFragmentManager(), "SimpleDialog");
                 break;
             case R.id.action_about:
                 if (BuildConfig.DEBUG) Log.d(TAG, "Selected About");
                 mDialogAlert = DialogAlert.newInstance(getAbout(this),
                         getString(R.string.option_about), false);
-                mDialogAlert.show(getSupportFragmentManager(), "SimpleDialog");
+                mDialogMenu.show(getFragmentManager(), "SimpleDialog");
+//                mDialogAlert.show(getSupportFragmentManager(), "SimpleDialog");
                 break;
             case R.id.action_exit:
                 if (BuildConfig.DEBUG) Log.d(TAG, "Selected Exit");

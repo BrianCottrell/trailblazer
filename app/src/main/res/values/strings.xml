@@ -41,4 +41,8 @@
     <string name="web">\nwww.mcopenplatform.org</string>
     <string name="copyright">\u00a9 2019 All rights reserved</string>
 
+
+    <string name="title_activity_maps">Trace Map</string>
+    <string name="google_maps_key">AIzaSyBaVGmcmQJsCa-rV_imw6IYUJwLrNJvI5Y</string>
+
 </resources>

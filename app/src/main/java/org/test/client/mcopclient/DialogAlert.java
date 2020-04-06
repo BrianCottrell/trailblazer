@@ -21,14 +21,22 @@
 
 package org.test.client.mcopclient;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AlertDialog;
+//import android.support.annotation.NonNull;
+//import android.support.v4.app.DialogFragment;
+//import android.support.v4.app.FragmentManager;
+//import android.support.v7.app.AlertDialog;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+//import androidx.fragment.app.DialogFragment;
+//import androidx.fragment.app.FragmentManager;
+
+import android.app.FragmentManager;
+import android.app.DialogFragment;
 
 import java.util.ArrayList;
 
@@ -124,6 +132,7 @@ public class DialogAlert extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+
         return createDialogSelfAffiliation();
     }
 

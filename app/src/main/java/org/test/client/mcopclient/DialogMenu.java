@@ -22,14 +22,20 @@
 
 package org.test.client.mcopclient;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
+//import android.support.annotation.NonNull;
+//import android.support.v4.app.DialogFragment;
+//import android.support.v7.app.AlertDialog;
 import android.widget.EditText;
 import android.widget.Spinner;
+
+import androidx.annotation.NonNull;
+// import androidx.fragment.app.DialogFragment;
+import android.app.DialogFragment;
 
 
 public class DialogMenu extends DialogFragment {

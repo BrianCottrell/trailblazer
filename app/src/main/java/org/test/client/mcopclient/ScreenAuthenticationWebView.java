@@ -28,7 +28,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
+//import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
@@ -37,6 +37,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -194,7 +195,7 @@ public class ScreenAuthenticationWebView extends AppCompatActivity {
 
     @Override
     protected void onNewIntent(Intent intent) {
-
+        super.onNewIntent(intent);
     }
 
     @Override

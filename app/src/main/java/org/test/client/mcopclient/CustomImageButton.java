@@ -2,9 +2,10 @@ package org.test.client.mcopclient;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.widget.ImageButton;
 // import android.widget.ImageButton;
 
-public class CustomImageButton extends android.support.v7.widget.AppCompatImageButton {
+public class CustomImageButton extends androidx.appcompat.widget.AppCompatImageButton {  // android.support.v7.widget.AppCompatImageButton {
     public CustomImageButton(Context context) {
         super(context);
     }
