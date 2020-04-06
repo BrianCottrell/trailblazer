@@ -81,6 +81,7 @@ import android.widget.Toast;
 //import android.widget.Toolbar;
 
 //import com.google.android.material.appbar.AppBarLayout;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -93,7 +94,12 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.appbar.AppBarLayout;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 //import com.google.android.material.appbar.AppBarLayout;
 
 import org.mcopenplatform.muoapi.IMCOPCallback;
@@ -104,13 +110,16 @@ import org.test.client.mcopclient.preference.PreferencesManagerDefault;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -193,6 +202,9 @@ public class MainActivity extends AppCompatActivity { // AppCompatActivity {
     private boolean emergency = false;
     private boolean doingVoice = false;
     private boolean forceCall = false;
+
+    // Access a Cloud Firestore instance from your Activity
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     private enum State {
         GRANTED,
@@ -818,6 +830,7 @@ public class MainActivity extends AppCompatActivity { // AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), MapsMarkerActivity.class);
 //                Intent intent = new Intent(getApplicationContext(), MapActivity.class);
+                intent.putExtra("TRACKING", tracking);
                 startActivity(intent);
             }
         });
@@ -1093,7 +1106,7 @@ public class MainActivity extends AppCompatActivity { // AppCompatActivity {
             public void run() {
                 sendLocation();
             }
-        }, 0, 2000);
+        }, 0, 5000);
 
     }
 
@@ -1111,6 +1124,9 @@ public class MainActivity extends AppCompatActivity { // AppCompatActivity {
                 // for ActivityCompat#requestPermissions for more details.
                 return;
             }
+            double oldLat = userData.getLatitude();
+            double oldLon = userData.getLongitude();
+
             Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if (location == null) {
                 location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -1128,6 +1144,43 @@ public class MainActivity extends AppCompatActivity { // AppCompatActivity {
                     text_tracking.setText(tt);
                 }
             });
+
+            double dist = Math.abs(oldLat - latitude) + Math.abs(oldLon - longitude);
+            if (dist < 0.0002) { return; }  // About 70 feet
+
+            userData.setLatitude(latitude);
+            userData.setLongitude(longitude);
+
+            Map<String, Object> loc = new HashMap<>();
+            loc.put("latitude", latitude);
+            loc.put("longitude", longitude);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+            sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+            Long tsLong = System.currentTimeMillis()/1000;
+            String ts = tsLong.toString();
+
+            loc.put("date", sdf.format(new Date()));
+
+            Map<String, Object> newLoc = new HashMap<>();
+            newLoc.put(ts, loc);
+
+            String doc = userData.getDisplayName().replaceAll("\\s+", "_").toLowerCase();
+            db.collection("users")
+                    .document(doc)
+                    .set(newLoc, SetOptions.merge())
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+//                            Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
+                            Log.d(TAG, "DocumentSnapshot successfully written!");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(TAG, "Error adding document", e);
+                        }
+                    });
 
             Uri uri = new Uri.Builder()
                     .scheme("http")
@@ -1312,6 +1365,7 @@ public class MainActivity extends AppCompatActivity { // AppCompatActivity {
                 }
             } else if (mCallType == CallType.PRIVATE) {
                 // Private Call
+                // mcptt_id_ta_A@organization.org = DEMO A
                 try {
                     Log.d(TAG,"Call type: " + mCallType);
                     if(mService!=null) {
@@ -1559,6 +1613,7 @@ public class MainActivity extends AppCompatActivity { // AppCompatActivity {
 //        switch_private.setTextColor(ContextCompat.getColor(this, R.color.background));
         spinnerGroups.setEnabled(false);
         spinnerUsers.setEnabled(false);
+        btn_track.setEnabled(false);
         btn_speaker.setEnabled(false);
         isSpeakerphoneOn=false;
         btn_speaker.setImageResource(R.drawable.mute);
@@ -1590,6 +1645,7 @@ public class MainActivity extends AppCompatActivity { // AppCompatActivity {
         spinnerUsers.setEnabled(false);
         spinnerUsers.setVisibility((View.GONE));
         spinnerGroups.setVisibility((View.VISIBLE));
+        btn_track.setEnabled(true);
         btn_speaker.setEnabled(true);
         registered = true;
         invalidateOptionsMenu();

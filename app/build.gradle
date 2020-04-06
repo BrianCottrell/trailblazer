@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 28
@@ -47,9 +48,13 @@ dependencies {
     api 'com.android.support:recyclerview-v7:' + rootProject.supportLibVersion
     implementation 'com.android.volley:volley:1.1.1'
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
+    implementation 'com.google.android.gms:play-services-location:17.0.0'
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.android.support:design:28.0.0'
     implementation 'com.google.android.material:material:1.1.0'
+    implementation 'com.google.firebase:firebase-auth:19.3.0'
+    implementation 'com.google.firebase:firebase-firestore:21.4.2'
+    implementation 'com.google.firebase:firebase-database:19.2.1'
 
 //    implementation 'com.android.support.design:widget:28.0.0'
 

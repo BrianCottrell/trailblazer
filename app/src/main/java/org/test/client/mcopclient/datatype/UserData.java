@@ -34,12 +34,16 @@ public class UserData {
     private String displayName;
     private Map<String,String> sessionIDs;
     private boolean isRegisted;
+    private double latitude;
+    private double longitude;
 
 
     public UserData(String mcpttID, String displayName) {
         this.mcpttID = mcpttID;
         this.displayName = displayName;
         sessionIDs=new HashMap<String,String>();
+        this.latitude = 0.0;
+        this.longitude = 0.0;
     }
 
 
@@ -48,11 +52,15 @@ public class UserData {
         this.displayName = displayName;
         this.isRegisted = isRegisted;
         sessionIDs=new HashMap<String,String>();
+        this.latitude = 0.0;
+        this.longitude = 0.0;
     }
 
 
     public UserData() {
         sessionIDs=new HashMap<String,String>();
+        this.latitude = 0.0;
+        this.longitude = 0.0;
     }
 
 
@@ -96,5 +104,21 @@ public class UserData {
 
     public void addSessionID(String sessionIDs) {
         this.sessionIDs.put(sessionIDs,sessionIDs);
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 }
