@@ -3,13 +3,18 @@ package org.test.client.mcopclient;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 //import android.support.v7.app.AppCompatActivity;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,6 +30,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polygon;
+import com.google.android.gms.maps.model.PolygonOptions;
 
 import java.util.Random;
 import java.util.Timer;
@@ -37,6 +44,10 @@ public class MapsMarkerActivity extends AppCompatActivity
         implements OnMapReadyCallback {
 
     public boolean tracking = false;
+    private double initialLat = 0.0;
+    private double initialLon = 0.0;
+    private double forceLat = 0.0;
+    private double forceLon = 0.0;
 
     private GoogleMap googleMap;
     private Marker myMarker;
@@ -47,6 +58,11 @@ public class MapsMarkerActivity extends AppCompatActivity
     private double lonAdj = 0.0;
     private double oldLat = 0.0;
     private double oldLon = 0.0;
+
+    private Button btn_default;
+    private Button btn_red;
+    private Button btn_green;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +78,71 @@ public class MapsMarkerActivity extends AppCompatActivity
         mapFragment.getMapAsync(this);
 
         tracking = getIntent().getBooleanExtra("TRACKING", false);
+        forceLat = getIntent().getDoubleExtra("FLATITUDE", 0.0);
+        forceLon = getIntent().getDoubleExtra("FLONGITUDE", 0.0);
+
+        btn_default = (Button) findViewById(R.id.map_button_default);
+        btn_red = (Button) findViewById(R.id.map_button_red);
+        btn_green = (Button) findViewById(R.id.map_button_green);
+
+        btn_default.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LatLng myLoc = new LatLng(myLatitude, myLongitude);
+//                BitmapDescriptor bm = BitmapDescriptorFactory.fromResource(R.drawable.token_default);
+                BitmapDescriptor bm = BitmapDescriptorFactory.fromBitmap(resizeMapIcons("token_default",100,100));
+                MarkerOptions marker = new MarkerOptions()
+                        .position(myLoc)
+                        .alpha(0.8f)
+                        .anchor(0.5f, 0.5f)
+                        .icon(bm)
+                        .title("Review");
+                googleMap.addMarker(marker);
+
+            }
+        });
+        btn_green.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LatLng myLoc = new LatLng(myLatitude, myLongitude);
+//                BitmapDescriptor bm = BitmapDescriptorFactory.fromResource(R.drawable.token_default);
+                BitmapDescriptor bm = BitmapDescriptorFactory.fromBitmap(resizeMapIcons("token_green",100,100));
+                MarkerOptions marker = new MarkerOptions()
+                        .position(myLoc)
+                        .alpha(0.8f)
+                        .anchor(0.5f, 0.5f)
+                        .icon(bm)
+                        .title("Clear");
+                googleMap.addMarker(marker);
+
+            }
+        });
+        btn_red.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LatLng myLoc = new LatLng(myLatitude, myLongitude);
+//                BitmapDescriptor bm = BitmapDescriptorFactory.fromResource(R.drawable.token_default);
+                BitmapDescriptor bm = BitmapDescriptorFactory.fromBitmap(resizeMapIcons("token_red",100,100));
+                MarkerOptions marker = new MarkerOptions()
+                        .position(myLoc)
+                        .alpha(0.8f)
+                        .anchor(0.5f, 0.5f)
+                        .icon(bm)
+                        .title("Danger");
+                googleMap.addMarker(marker);
+
+            }
+        });
+
     }
+
+    public Bitmap resizeMapIcons(String iconName, int width, int height){
+        Bitmap imageBitmap = BitmapFactory.decodeResource(getResources(),getResources().getIdentifier(iconName, "drawable", getPackageName()));
+        Bitmap resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, width, height, false);
+        return resizedBitmap;
+    }
+
+    private static final int COLOR_ORANGE_ARGB = 0x30F57F17;
 
     /**
      * Manipulates the map when it's available.
@@ -88,13 +168,36 @@ public class MapsMarkerActivity extends AppCompatActivity
             return;
         }
 
+        // 34.042709, -118.432666 = home
+        // 34.044736, -118.433889
+        Polygon polygon = googleMap.addPolygon(new PolygonOptions()
+                .clickable(true)
+                .add(
+                        new LatLng(34.044736, -118.433889),
+                        new LatLng(34.046736, -118.429889),
+                        new LatLng(34.043736, -118.428889),
+                        new LatLng(34.042736, -118.431889),
+                        new LatLng(34.041736, -118.434889),
+                        new LatLng(34.044736, -118.433889)));
+
+        // Store a data object with the polygon, used here to indicate an arbitrary type.
+        polygon.setTag("Search Area");
+        polygon.setFillColor(COLOR_ORANGE_ARGB);
+
         Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         if (location == null) {
             location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             if (location == null) { return; }
         }
-        myLatitude = location.getLatitude();
-        myLongitude = location.getLongitude();
+        double curLatitude = location.getLatitude();
+        double curLongitude = location.getLongitude();
+        if (initialLat == 0) {
+            initialLat = curLatitude;
+            initialLon = curLongitude;
+        }
+
+        myLatitude = (forceLat == 0) ? curLatitude : forceLat;
+        myLongitude = (forceLon == 0) ? curLongitude : forceLon;
 
         this.googleMap = googleMap;
 
@@ -114,7 +217,7 @@ public class MapsMarkerActivity extends AppCompatActivity
                 ;
         myMarker = googleMap.addMarker(marker);
         googleMap.animateCamera(CameraUpdateFactory.newLatLng(myLoc));
-        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 17));
 //        googleMap.moveCamera(CameraUpdateFactory.newLatLng(myLoc));
 //        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
 
@@ -137,8 +240,14 @@ public class MapsMarkerActivity extends AppCompatActivity
             location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             if (location == null) { return; }
         }
-        myLatitude = location.getLatitude();
-        myLongitude = location.getLongitude();
+
+        if (forceLat == 0) {
+            myLatitude = location.getLatitude();
+            myLongitude = location.getLongitude();
+        } else {
+            myLatitude = (location.getLatitude() - initialLat) + forceLat;
+            myLongitude = (location.getLongitude() - initialLon) + forceLon;
+        }
 
         if (tracking) {
 //            double random = ThreadLocalRandom.current().nextDouble(min, max);
@@ -159,10 +268,10 @@ public class MapsMarkerActivity extends AppCompatActivity
                     @Override
                     public void run() {
                         LatLng myLoc = new LatLng(oldLat, oldLon);
-                        BitmapDescriptor bm = BitmapDescriptorFactory.fromResource(R.drawable.greencircle80);
+                        BitmapDescriptor bm = BitmapDescriptorFactory.fromResource(R.drawable.bluecircle80);
                         MarkerOptions marker = new MarkerOptions()
                                 .position(myLoc)
-                                .alpha((float) 0.4)
+                                .alpha((float) 0.3)
                                 .anchor(0.5f, 0.5f)
                                 .icon(bm)
 //                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
@@ -179,7 +288,7 @@ public class MapsMarkerActivity extends AppCompatActivity
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
-                Log.d("UI thread", "Loc: "+myLatitude+" , "+myLongitude);
+//                Log.d("UI thread", "Loc: "+myLatitude+" , "+myLongitude);
                 LatLng myLoc = new LatLng(myLatitude, myLongitude);
                 myMarker.setPosition(myLoc);
             }

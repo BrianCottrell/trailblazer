@@ -34,6 +34,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.location.Location;
 import android.location.LocationManager;
 import android.media.AudioManager;
@@ -831,6 +832,9 @@ public class MainActivity extends AppCompatActivity { // AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), MapsMarkerActivity.class);
 //                Intent intent = new Intent(getApplicationContext(), MapActivity.class);
                 intent.putExtra("TRACKING", tracking);
+                // 34.042709, -118.432666 = home
+                intent.putExtra("FLATITUDE", 34.043709);
+                intent.putExtra("FLONGITUDE", -118.432666);
                 startActivity(intent);
             }
         });
@@ -1110,7 +1114,6 @@ public class MainActivity extends AppCompatActivity { // AppCompatActivity {
 
     }
 
-
     private void sendLocation() {
         if (tracking ) {
             LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -1132,15 +1135,15 @@ public class MainActivity extends AppCompatActivity { // AppCompatActivity {
                 location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                 if (location == null) { return; }
             }
-            double longitude = location.getLongitude();
             double latitude = location.getLatitude();
+            double longitude = location.getLongitude();
 
             DecimalFormat df = new DecimalFormat("0.000000");
             final String tt = "Tracking : "+df.format(latitude)+" , "+df.format(longitude);
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d("UI thread", "I am the UI thread");
+//                    Log.d("UI thread", "I am the UI thread");
                     text_tracking.setText(tt);
                 }
             });
@@ -1156,8 +1159,8 @@ public class MainActivity extends AppCompatActivity { // AppCompatActivity {
             loc.put("longitude", longitude);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
             sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-            Long tsLong = System.currentTimeMillis()/1000;
-            String ts = tsLong.toString();
+            long tsLong = System.currentTimeMillis()/1000;
+            String ts = Long.toString(tsLong);
 
             loc.put("date", sdf.format(new Date()));
 
@@ -1593,6 +1596,24 @@ public class MainActivity extends AppCompatActivity { // AppCompatActivity {
                 break;
         }
     }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//            actionEvent.setText("ORIENTATION LANDSCAPE");
+            Intent intent = new Intent(getApplicationContext(), MapsMarkerActivity.class);
+//                Intent intent = new Intent(getApplicationContext(), MapActivity.class);
+            intent.putExtra("TRACKING", tracking);
+            // 34.042709, -118.432666 = home
+            intent.putExtra("FLATITUDE", 34.043709);
+            intent.putExtra("FLONGITUDE", -118.432666);
+            startActivity(intent);
+        } else {
+//            actionEvent.setText("ORIENTATION PORTRAIT");
+        }
+    }
+
 
     // START GUI
     private void unRegisted(boolean success){

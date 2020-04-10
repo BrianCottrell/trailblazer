@@ -35,8 +35,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
+        <!--            android:screenOrientation="portrait"-->
         <activity
             android:name=".MainActivity"
+            android:configChanges = "keyboardHidden|orientation|screenSize"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -65,6 +67,10 @@
 
         <activity
             android:name=".MapsMarkerActivity"
+            android:theme="@style/Theme.AppCompat.DialogWhenLarge"
+            android:windowMinWidthMajor="75%"
+            android:windowMinWidthMinor="95%"
+            android:dialogCornerRadius="8dp"
             android:label="@string/title_activity_maps">
 
             <intent-filter>
