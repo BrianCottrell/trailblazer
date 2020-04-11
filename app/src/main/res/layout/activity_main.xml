@@ -24,431 +24,484 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
 
+    xmlns:tools="http://schemas.android.com/tools"
 
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-<!--
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appbar"
 
-        android:layout_height="192dp"
-        android:layout_width="match_parent">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-        <com.google.android.material.appbar.CollapsingToolbarLayout
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/screen_menu_toolbar_AppBarLayout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:toolbarId="@+id/toolbar"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
-
-            app:contentScrim="?attr/colorPrimary">
-
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:theme="@style/AppTheme.AppBarOverlay"
+            app:layout_constraintTop_toTopOf="parent">
 
             <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_height="?attr/actionBarSize"
-                android:layout_width="match_parent"></androidx.appcompat.widget.Toolbar>
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
-    </com.google.android.material.appbar.AppBarLayout>
--->
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-
-
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-<!--                <android.support.design.widget.AppBarLayout-->
-                <com.google.android.material.appbar.AppBarLayout
-                    android:id="@+id/screen_menu_toolbar_AppBarLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingTop="8dp"
-                    android:theme="@style/AppTheme.AppBarOverlay">
-
-<!--                    <android.support.v7.widget.Toolbar-->
-                    <androidx.appcompat.widget.Toolbar
-                        android:id="@+id/screen_menu_toolbar"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-
-                        app:popupTheme="@style/AppTheme.PopupOverlay">
-
-                        <RelativeLayout
-                            android:id="@+id/screen_menu_toolbar_mcop_logo"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_horizontal|center_vertical">
-
-                            <ImageView
-                                android:id="@+id/logoMCOP"
-                                android:layout_width="wrap_content"
-                                android:layout_height="60dp"
-                                android:scaleType="fitCenter"
-                                android:adjustViewBounds="true"
-                                app:srcCompat="@drawable/mcop_logo" />
-
-                        </RelativeLayout>
-                    </androidx.appcompat.widget.Toolbar>
-<!--                    </android.support.v7.widget.Toolbar>-->
-                </com.google.android.material.appbar.AppBarLayout>
-<!--                </android.support.design.widget.AppBarLayout>-->
-
-
-
-            <LinearLayout
+                android:id="@+id/screen_menu_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:orientation="vertical">
+
+                app:popupTheme="@style/AppTheme.PopupOverlay">
 
                 <RelativeLayout
-                    android:layout_width="fill_parent"
+                    android:id="@+id/screen_menu_toolbar_mcop_logo"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:layout_weight="1"
-                    android:orientation="horizontal">
+                    android:gravity="center_horizontal|center_vertical">
 
-                    <TextView
-                        android:id="@+id/text_eMBMS"
+                    <ImageView
+                        android:id="@+id/logoMCOP"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:layout_alignParentTop="true"
-                        android:layout_marginStart="16dp"
-                        android:layout_weight="1"
-                        android:text="@string/text_eMBMS"
-                        android:textAlignment="viewStart"
-                        android:textColor="@color/background"
-                        android:textSize="14sp" />
+                        android:layout_height="60dp"
+                        android:adjustViewBounds="true"
+                        android:scaleType="fitCenter"
+                        app:srcCompat="@drawable/mcop_logo" />
 
-                    <TextView
-                        android:id="@+id/text_status"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="16dp"
-                        android:layout_weight="1"
-                        android:text="@string/text_status"
-                        android:textColor="@color/background"
-                        android:textSize="14sp" />
-
-                    <TextView
-                        android:id="@+id/text_heading"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="-4dp"
-                        android:layout_toLeftOf="@id/text_status"
-                        android:layout_toRightOf="@id/reg_eMBMS"
-                        android:layout_weight="1"
-                        android:gravity="center_horizontal"
-                        android:text="OFFLINE"
-                        android:textAlignment="center"
-                        android:textAllCaps="true"
-                        android:textColor="@color/background"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
-
-                    <Button
-                        android:id="@+id/reg_eMBMS"
-                        android:layout_width="21dp"
-                        android:layout_height="21dp"
-                        android:layout_alignParentStart="true"
-                        android:layout_alignParentTop="true"
-                        android:layout_marginStart="90dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/reg_status" />
-
-                    <Button
-                        android:id="@+id/reg_status"
-                        android:layout_width="21dp"
-                        android:layout_height="21dp"
-                        android:layout_alignParentRight="true"
-                        android:layout_marginEnd="90dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/reg_status" />
                 </RelativeLayout>
+            </androidx.appcompat.widget.Toolbar>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <LinearLayout
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toTopOf="@id/map_button_frame"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/screen_menu_toolbar_AppBarLayout">
+
+            <androidx.core.widget.NestedScrollView
+                android:id="@+id/control_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginTop="1dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
                     android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/text_talking"
-                        android:layout_width="match_parent"
+                    <RelativeLayout
+                        android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/text_talking"
-                        android:textSize="15sp"
-                        android:textColor="@color/colorPrimaryDark" />
+                        android:layout_weight="1"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/text_callingid"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textSize="18sp"
-                        android:textColor="@color/colorPrimaryDark" />
-                </LinearLayout>
+                        <TextView
+                            android:id="@+id/text_eMBMS"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_alignParentTop="true"
+                            android:layout_marginStart="16dp"
+                            android:layout_weight="1"
+                            android:text="@string/text_eMBMS"
+                            android:textAlignment="viewStart"
+                            android:textColor="@color/background"
+                            android:textSize="14sp" />
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="44dp"
-                    android:layout_gravity="center_horizontal|center_vertical"
-                    android:layout_weight="1"
-                    android:orientation="horizontal">
+                        <TextView
+                            android:id="@+id/text_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentRight="true"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginRight="16dp"
+                            android:layout_weight="1"
+                            android:text="@string/text_status"
+                            android:textColor="@color/background"
+                            android:textSize="14sp" />
 
-                    <RadioGroup
-                        android:id="@+id/callRadioGroup"
+                        <TextView
+                            android:id="@+id/text_heading"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="-4dp"
+                            android:layout_toLeftOf="@id/text_status"
+                            android:layout_toRightOf="@id/reg_eMBMS"
+                            android:layout_weight="1"
+                            android:gravity="center_horizontal"
+                            android:text="OFFLINE"
+                            android:textAlignment="center"
+                            android:textAllCaps="true"
+                            android:textColor="@color/background"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <Button
+                            android:id="@+id/reg_eMBMS"
+                            android:layout_width="21dp"
+                            android:layout_height="21dp"
+                            android:layout_alignParentStart="true"
+                            android:layout_alignParentTop="true"
+                            android:layout_marginStart="90dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/reg_status" />
+
+                        <Button
+                            android:id="@+id/reg_status"
+                            android:layout_width="21dp"
+                            android:layout_height="21dp"
+                            android:layout_alignParentRight="true"
+                            android:layout_marginEnd="90dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/reg_status" />
+                    </RelativeLayout>
+
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/text_talking"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/text_talking"
+                            android:textColor="@color/colorPrimaryDark"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:id="@+id/text_callingid"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/colorPrimaryDark"
+                            android:textSize="18sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="44dp"
+                        android:layout_gravity="center_horizontal|center_vertical"
                         android:layout_weight="1"
                         android:orientation="horizontal">
 
-                        <RadioButton
-                            android:id="@+id/groupCallRadioButton"
+                        <RadioGroup
+                            android:id="@+id/callRadioGroup"
                             android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="horizontal">
+
+                            <RadioButton
+                                android:id="@+id/groupCallRadioButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:checked="true"
+                                android:text="Group Call" />
+
+                            <Space
+                                android:layout_width="20dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1" />
+
+                            <RadioButton
+                                android:id="@+id/privateCallRadioButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Private Call" />
+                        </RadioGroup>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="10dp"
+                        android:layout_weight="1"
+                        android:gravity="bottom"
+                        android:orientation="horizontal">
+
+                        <Spinner
+                            android:id="@+id/spinnerGroups"
+                            android:layout_width="368dp"
                             android:layout_height="wrap_content"
-                            android:checked="true"
-                            android:text="Group Call" />
+                            android:layout_marginStart="5dp"
+                            android:layout_marginTop="1dp"
+                            android:layout_marginEnd="1dp"
+                            android:layout_marginBottom="1dp"
+                            android:color="@color/white"
+                            android:enabled="false" />
 
-                        <Space
-                            android:layout_width="20dp"
+                        <Spinner
+                            android:id="@+id/spinnerUsers"
+                            android:layout_width="368dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1" />
+                            android:layout_marginStart="5dp"
+                            android:layout_marginTop="1dp"
+                            android:layout_marginEnd="1dp"
+                            android:layout_marginBottom="1dp"
+                            android:color="@color/white"
+                            android:enabled="false" />
+                    </LinearLayout>
 
-                        <RadioButton
-                            android:id="@+id/privateCallRadioButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Private Call" />
-                    </RadioGroup>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="10dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
 
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="10dp"
-                    android:layout_weight="1"
-                    android:gravity="bottom"
-                    android:orientation="horizontal">
-
-                    <Spinner
-                        android:id="@+id/spinnerGroups"
-                        android:layout_width="368dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:layout_marginTop="1dp"
-                        android:layout_marginEnd="1dp"
-                        android:layout_marginBottom="1dp"
-                        android:color="@color/white"
-                        android:enabled="false" />
-
-                    <Spinner
-                        android:id="@+id/spinnerUsers"
-                        android:layout_width="368dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:layout_marginTop="1dp"
-                        android:layout_marginEnd="1dp"
-                        android:layout_marginBottom="1dp"
-                        android:color="@color/white"
-                        android:enabled="false" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="10dp"
-                    android:layout_weight="1"
-                    android:orientation="horizontal">
+                        <ImageButton
+                            android:id="@+id/btn_speaker"
+                            android:layout_width="185dp"
+                            android:layout_height="85dp"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_weight="1"
+                            android:background="@drawable/roundcorner"
+                            app:srcCompat="@drawable/mute" />
+                    </LinearLayout>
 
                     <Space
-                        android:layout_width="10dp"
-                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:layout_height="10dp"
                         android:layout_weight="1" />
 
-                    <ImageButton
-                        android:id="@+id/btn_speaker"
-                        android:layout_width="185dp"
-                        android:layout_height="85dp"
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="5dp"
                         android:layout_weight="1"
-                        android:background="@drawable/roundcorner"
-                        app:srcCompat="@drawable/mute" />
+                        android:orientation="horizontal" />
+
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:layout_weight="1"
+                        android:background="#9CD69C">
+
+                        <ImageView
+                            android:id="@+id/imageView"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:layout_centerVertical="true"
+                            android:layout_gravity="left|center_vertical"
+                            android:layout_marginLeft="20dp"
+                            android:layout_weight="1"
+                            app:srcCompat="@drawable/tracking" />
+
+                        <TextView
+                            android:id="@+id/text_tracking"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_marginLeft="20dp"
+                            android:layout_toRightOf="@id/imageView"
+                            android:text="Tracking"
+                            android:textColor="#0C572A"
+                            android:textStyle="bold" />
+
+                        <Switch
+                            android:id="@+id/trackingButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginRight="20dp"
+                            android:layout_weight="1"
+                            android:enabled="false" />
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:layout_weight="1"
+                        android:background="#E99E9B">
+
+                        <ImageView
+                            android:id="@+id/imageView3"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:layout_centerVertical="true"
+                            android:layout_gravity="left|center_vertical"
+                            android:layout_marginLeft="20dp"
+                            android:layout_weight="1"
+                            app:srcCompat="@drawable/emergency" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_marginLeft="20dp"
+                            android:layout_toRightOf="@id/imageView3"
+                            android:text="Emergency Mode"
+                            android:textColor="#0C572A"
+                            android:textStyle="bold" />
+
+                        <Switch
+                            android:id="@+id/emergencyButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginRight="20dp"
+                            android:layout_weight="1" />
+
+                    </RelativeLayout>
+
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="10dp"
+                        android:layout_weight="1" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:id="@+id/text_info"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="#bebebe"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/text_error"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="#bebebe"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/text_affiliation"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="#bebebe"
+                            android:textSize="12sp" />
+
+                    </LinearLayout>
                 </LinearLayout>
 
-                <Space
-                    android:layout_width="match_parent"
-                    android:layout_height="10dp"
-                    android:layout_weight="1" />
+            </androidx.core.widget.NestedScrollView>
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="5dp"
-                    android:layout_weight="1"
-                    android:orientation="horizontal" />
+<!--            <FrameLayout-->
+<!--                android:id="@+id/map_layout"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:backgroundTint="@color/colorERdark"-->
+<!--                android:orientation="vertical"-->
+<!--                android:visibility="gone">-->
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/map_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                >
 
                 <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="60dp"
-                    android:layout_weight="1"
-                    android:background="#FFC107">
+                    android:id="@+id/map_buttons"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:background="@color/design_default_color_secondary"
+                    app:layout_constrainedHeight="true"
+                    app:layout_constraintHeight_max="80dp"
+                    app:layout_constraintBottom_toTopOf="@+id/map_view"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
 
                     <Button
-                        android:id="@+id/mapButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:background="#00FFFFFF"
-                        android:text="Map View" />
+                        android:id="@+id/map_button_1"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:layout_alignParentLeft="true"
+                        android:layout_marginStart="20dp"
+                        android:background="@drawable/action_default" />
 
-                    <ImageView
-                        android:id="@+id/imageView2"
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:translationX="50dp"
-                        android:translationY="12dp"
-                        android:translationZ="10dp"
-                        app:srcCompat="@drawable/map" />
+                    <Button
+                        android:id="@+id/map_button_2"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:layout_alignParentLeft="true"
+                        android:layout_marginStart="100dp"
+                        android:background="@drawable/action_green" />
+
+                    <Button
+                        android:id="@+id/map_button_3"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:layout_alignParentLeft="true"
+                        android:layout_marginStart="180dp"
+                        android:background="@drawable/action_red" />
+
                 </FrameLayout>
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="60dp"
-                    android:layout_weight="1"
-                    android:background="#9CD69C">
+                <FrameLayout
+                    android:id="@+id/map_view"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/map_buttons">
 
-                    <ImageView
-                        android:id="@+id/imageView"
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:layout_centerVertical="true"
-                        android:layout_gravity="left|center_vertical"
-                        android:layout_marginLeft="20dp"
-                        android:layout_weight="1"
-                        app:srcCompat="@drawable/tracking" />
-
-                    <TextView
-                        android:id="@+id/text_tracking"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginLeft="20dp"
-                        android:layout_toRightOf="@id/imageView"
-                        android:text="Tracking"
-                        android:textColor="#0C572A"
-                        android:textStyle="bold" />
-
-                    <Switch
-                        android:id="@+id/trackingButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginRight="20dp"
-                        android:layout_weight="1"
-                        android:enabled="false" />
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="60dp"
-                    android:layout_weight="1"
-                    android:background="#E99E9B">
-
-                    <ImageView
-                        android:id="@+id/imageView3"
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:layout_centerVertical="true"
-                        android:layout_gravity="left|center_vertical"
-                        android:layout_marginLeft="20dp"
-                        android:layout_weight="1"
-                        app:srcCompat="@drawable/emergency" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginLeft="20dp"
-                        android:layout_toRightOf="@id/imageView3"
-                        android:text="Emergency Mode"
-                        android:textColor="#0C572A"
-                        android:textStyle="bold" />
-
-                    <Switch
-                        android:id="@+id/emergencyButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginRight="20dp"
-                        android:layout_weight="1" />
-
-                </RelativeLayout>
-
-                <Space
-                    android:layout_width="match_parent"
-                    android:layout_height="10dp"
-                    android:layout_weight="1" />
-
-                <org.test.client.mcopclient.CustomImageButton
-                    android:id="@+id/btn_call"
-                    android:layout_width="match_parent"
-                    android:layout_height="185dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/roundedcallgreen"
-                    android:paddingLeft="10dp"
-                    app:srcCompat="@drawable/call" />
-
-                <Space
-                    android:layout_width="match_parent"
-                    android:layout_height="10dp"
-                    android:layout_weight="1" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/text_info"
+                    <fragment
+                        android:id="@+id/map"
+                        android:name="com.google.android.gms.maps.SupportMapFragment"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textSize="12sp"
-                        android:textColor="#bebebe" />
+                        android:layout_height="match_parent"
+                        tools:context="org.test.client.mcopclient.MainActivity"
+                        tools:layout="@layout/activity_main" />
+                </FrameLayout>
 
-                    <TextView
-                        android:id="@+id/text_error"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textSize="12sp"
-                        android:textColor="#bebebe" />
 
-                    <TextView
-                        android:id="@+id/text_affiliation"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textSize="12sp"
-                        android:textColor="#bebebe" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-
+            </androidx.constraintlayout.widget.ConstraintLayout>
+<!--            </FrameLayout>-->
         </LinearLayout>
 
-    </androidx.core.widget.NestedScrollView>
+        <FrameLayout
+            android:id="@+id/map_button_frame"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:background="#FFC107"
+            app:layout_constraintBottom_toTopOf="@id/btn_call">
 
+            <Button
+                android:id="@+id/mapButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:background="#00FFFFFF"
+                android:text="Map View" />
+
+            <ImageView
+                android:id="@+id/imageView2"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:translationX="50dp"
+                android:translationY="12dp"
+                android:translationZ="10dp"
+                app:srcCompat="@drawable/map" />
+        </FrameLayout>
+
+        <org.test.client.mcopclient.CustomImageButton
+            android:id="@+id/btn_call"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="185dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/roundedcallgreen"
+            android:paddingTop="10dp"
+            app:srcCompat="@drawable/call" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -35,6 +35,8 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationManager;
 import android.media.AudioManager;
@@ -62,6 +64,7 @@ import android.support.v4.app.*;
 
 import android.telephony.TelephonyManager;
 import android.text.InputType;
+import android.text.Layout;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -73,7 +76,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -85,6 +90,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
@@ -95,6 +101,17 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polygon;
+import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.appbar.AppBarLayout;
@@ -119,12 +136,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MainActivity extends AppCompatActivity { // AppCompatActivity {
+public class MainActivity extends AppCompatActivity // AppCompatActivity {
+    implements OnMapReadyCallback {
+
     private final static String TAG = MainActivity.class.getCanonicalName();
     private static final int VOICE_RECOGNITION_REQUEST_CODE = 1234;
 
@@ -204,6 +224,293 @@ public class MainActivity extends AppCompatActivity { // AppCompatActivity {
     private boolean doingVoice = false;
     private boolean forceCall = false;
 
+    private androidx.core.widget.NestedScrollView controlLayout;
+    private androidx.constraintlayout.widget.ConstraintLayout mapLayout;
+//    private androidx.constraintlayout.widget.ConstraintLayout mapLayout;
+
+
+    private GoogleMap googleMap;
+    private Marker myMarker;
+    private double myLatitude = 0.0;
+    private double myLongitude = 0.0;
+    private double latAdj = 0.0;
+    private double lonAdj = 0.0;
+    private double oldLat = 0.0;
+    private double oldLon = 0.0;
+
+    private double initialLat = 0.0;
+    private double initialLon = 0.0;
+
+    private Button btn_map1;
+    private Button btn_map2;
+    private Button btn_map3;
+
+
+    // 34.042709, -118.432666 = home
+//                intent.putExtra("FLATITUDE", 34.043709);
+//                intent.putExtra("FLONGITUDE", -118.432666);
+
+    private double forceLat = 0.0;
+    private double forceLon = 0.0;
+
+    public Bitmap resizeMapIcons(String iconName, int width, int height){
+        Bitmap imageBitmap = BitmapFactory.decodeResource(getResources(),getResources().getIdentifier(iconName, "drawable", getPackageName()));
+        Bitmap resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, width, height, false);
+        return resizedBitmap;
+    }
+
+    private static final int COLOR_ORANGE_ARGB = 0x30F57F17;
+
+    /**
+     * Manipulates the map when it's available.
+     * The API invokes this callback when the map is ready to be used.
+     * This is where we can add markers or lines, add listeners or move the camera. In this case,
+     * we just add a marker near Sydney, Australia.
+     * If Google Play services is not installed on the device, the user receives a prompt to install
+     * Play services inside the SupportMapFragment. The API invokes this method after the user has
+     * installed Google Play services and returned to the app.
+     */
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+
+        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+
+        // 34.042709, -118.432666 = home
+        // 34.044736, -118.433889
+        Polygon polygon = googleMap.addPolygon(new PolygonOptions()
+                .clickable(true)
+                .add(
+                        new LatLng(34.044736, -118.433889),
+                        new LatLng(34.046736, -118.429889),
+                        new LatLng(34.043736, -118.428889),
+                        new LatLng(34.042736, -118.431889),
+                        new LatLng(34.041736, -118.434889),
+                        new LatLng(34.044736, -118.433889)));
+
+        // Store a data object with the polygon, used here to indicate an arbitrary type.
+        polygon.setTag("Search Area");
+        polygon.setFillColor(COLOR_ORANGE_ARGB);
+
+        Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        if (location == null) {
+            location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            if (location == null) { return; }
+        }
+        double curLatitude = location.getLatitude();
+        double curLongitude = location.getLongitude();
+
+        if (initialLat == 0) {
+            initialLat = curLatitude;
+            initialLon = curLongitude;
+        }
+
+        myLatitude = (forceLat == 0) ? curLatitude : forceLat;
+        myLongitude = (forceLon == 0) ? curLongitude : forceLon;
+
+
+        this.googleMap = googleMap;
+
+        // Add a marker in Sydney, Australia,
+        // and move the map's camera to the same location.
+//        LatLng sydney = new LatLng(-33.852, 151.211);
+        LatLng myLoc = new LatLng(myLatitude, myLongitude);
+
+        BitmapDescriptor bm = BitmapDescriptorFactory.fromResource(R.drawable.tracking);
+        MarkerOptions marker = new MarkerOptions()
+                .position(myLoc)
+                .alpha((float) 0.5)
+                .anchor(0.5f,0.5f)
+                .icon(bm)
+//                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                .title("My Location")
+                ;
+        myMarker = googleMap.addMarker(marker);
+        googleMap.animateCamera(CameraUpdateFactory.newLatLng(myLoc));
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 17));
+//        googleMap.moveCamera(CameraUpdateFactory.newLatLng(myLoc));
+//        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
+
+
+        new Timer().scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                updateLocation();
+            }
+        }, 0, 2000);
+
+    }
+
+    public void updateLocation() {
+        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        if (location == null) {
+            location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            if (location == null) { return; }
+        }
+
+        if (forceLat == 0) {
+            myLatitude = location.getLatitude();
+            myLongitude = location.getLongitude();
+        } else {
+            myLatitude = (location.getLatitude() - initialLat) + forceLat;
+            myLongitude = (location.getLongitude() - initialLon) + forceLon;
+        }
+
+        if (tracking) {
+//            double random = ThreadLocalRandom.current().nextDouble(min, max);
+
+            double rangeMin = 0.0001;
+            double rangeMax = 0.0001;
+            Random r = new Random();
+            latAdj += rangeMin + (rangeMax - rangeMin) * r.nextDouble();
+            lonAdj += rangeMin + (rangeMax - rangeMin) * r.nextDouble();
+            myLatitude += latAdj;
+            myLongitude += lonAdj;
+
+            double dist = Math.abs(oldLat - myLatitude) + Math.abs(oldLon - myLongitude);
+//            if (dist < 0.0006) { return; }  // About 210 feet
+
+            if (dist > 0.0006) {    // About 210 feet
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        LatLng myLoc = new LatLng(oldLat, oldLon);
+                        BitmapDescriptor bm = BitmapDescriptorFactory.fromResource(R.drawable.bluecircle80);
+                        MarkerOptions marker = new MarkerOptions()
+                                .position(myLoc)
+                                .alpha((float) 0.3)
+                                .anchor(0.5f, 0.5f)
+                                .icon(bm)
+//                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                                .title("Scanned");
+                        googleMap.addMarker(marker);
+                    }
+                });
+
+                oldLat = myLatitude;
+                oldLon = myLongitude;
+            }
+
+            DecimalFormat df = new DecimalFormat("0.000000");
+            final String tt = "Tracking : "+df.format(myLatitude)+" , "+df.format(myLongitude);
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+//                    Log.d("UI thread", "I am the UI thread");
+                    text_tracking.setText(tt);
+                }
+            });
+
+        }
+
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+//                Log.d("UI thread", "Loc: "+myLatitude+" , "+myLongitude);
+                LatLng myLoc = new LatLng(myLatitude, myLongitude);
+                myMarker.setPosition(myLoc);
+            }
+        });
+
+
+        if (tracking ) {
+            double oldLat = userData.getLatitude();
+            double oldLon = userData.getLongitude();
+
+            double latitude = myLatitude;
+            double longitude = myLongitude;
+
+            double dist = Math.abs(oldLat - latitude) + Math.abs(oldLon - longitude);
+            if (dist < 0.0002) { return; }  // About 70 feet
+
+            userData.setLatitude(latitude);
+            userData.setLongitude(longitude);
+
+            Map<String, Object> loc = new HashMap<>();
+            loc.put("latitude", latitude);
+            loc.put("longitude", longitude);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+            sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+            long tsLong = System.currentTimeMillis()/1000;
+            String ts = Long.toString(tsLong);
+
+            loc.put("date", sdf.format(new Date()));
+
+            Map<String, Object> newLoc = new HashMap<>();
+            newLoc.put(ts, loc);
+
+            String doc = userData.getDisplayName().replaceAll("\\s+", "_").toLowerCase();
+            db.collection("users")
+                    .document(doc)
+                    .set(newLoc, SetOptions.merge())
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+//                            Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
+                            Log.d(TAG, "DocumentSnapshot successfully written!");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(TAG, "Error adding document", e);
+                        }
+                    });
+
+            /*
+            Uri uri = new Uri.Builder()
+                    .scheme("http")
+                    .authority("trailblazerapp.herokuapp.com")
+                    .path("/add")
+                    .appendQueryParameter("latitude", latitude + "")
+                    .appendQueryParameter("longitude", longitude + "")
+                    .build();
+            // Instantiate the RequestQueue.
+            RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+
+            // Request a string response from the provided URL.
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, uri.toString(),
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            Log.i(TAG,response);
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+                    alertDialog.setTitle("Alert");
+                    alertDialog.setMessage("Request failed");
+                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                    alertDialog.show();
+                }
+            });
+
+            // Add the request to the RequestQueue.
+            queue.add(stringRequest);
+
+             */
+        }
+    }
+
     // Access a Cloud Firestore instance from your Activity
     FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -235,6 +542,19 @@ public class MainActivity extends AppCompatActivity { // AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.screen_menu_toolbar);
 //        setActionBar(toolbar);
         setSupportActionBar(toolbar);
+
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+
+//                intent.putExtra("FLATITUDE", 34.043709);
+//                intent.putExtra("FLONGITUDE", -118.432666);
+        forceLat = 34.043709;
+        forceLon = -118.432666;
+
+
 //        btn_register = (Button) findViewById(R.id.btn_groupcall);
 //        btn_unregister = (Button) findViewById(R.id.btn_privatecall);
         text_info = (TextView) findViewById(R.id.text_info);
@@ -263,6 +583,62 @@ public class MainActivity extends AppCompatActivity { // AppCompatActivity {
 
         btn_emergency = (Switch) findViewById(R.id.emergencyButton);
         callRadioGroup = (RadioGroup) findViewById(R.id.callRadioGroup);
+
+        controlLayout = (androidx.core.widget.NestedScrollView) findViewById(R.id.control_layout);
+//        mapLayout = (ConstraintLayout) findViewById(R.id.map_layout);
+        mapLayout = (androidx.constraintlayout.widget.ConstraintLayout) findViewById(R.id.map_layout);
+        btn_map1 = (Button) findViewById(R.id.map_button_1);
+        btn_map2 = (Button) findViewById(R.id.map_button_2);
+        btn_map3 = (Button) findViewById(R.id.map_button_3);
+
+        btn_map1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LatLng myLoc = new LatLng(myLatitude, myLongitude);
+//                BitmapDescriptor bm = BitmapDescriptorFactory.fromResource(R.drawable.action_default);
+                BitmapDescriptor bm = BitmapDescriptorFactory.fromBitmap(resizeMapIcons("action_default",100,100));
+                MarkerOptions marker = new MarkerOptions()
+                        .position(myLoc)
+                        .alpha(0.8f)
+                        .anchor(0.5f, 0.5f)
+                        .icon(bm)
+                        .title("Review");
+                googleMap.addMarker(marker);
+
+            }
+        });
+        btn_map2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LatLng myLoc = new LatLng(myLatitude, myLongitude);
+//                BitmapDescriptor bm = BitmapDescriptorFactory.fromResource(R.drawable.action_green);
+                BitmapDescriptor bm = BitmapDescriptorFactory.fromBitmap(resizeMapIcons("action_green",100,100));
+                MarkerOptions marker = new MarkerOptions()
+                        .position(myLoc)
+                        .alpha(0.8f)
+                        .anchor(0.5f, 0.5f)
+                        .icon(bm)
+                        .title("Clear");
+                googleMap.addMarker(marker);
+
+            }
+        });
+        btn_map3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LatLng myLoc = new LatLng(myLatitude, myLongitude);
+//                BitmapDescriptor bm = BitmapDescriptorFactory.fromResource(R.drawable.action_red);
+                BitmapDescriptor bm = BitmapDescriptorFactory.fromBitmap(resizeMapIcons("action_red",100,100));
+                MarkerOptions marker = new MarkerOptions()
+                        .position(myLoc)
+                        .alpha(0.8f)
+                        .anchor(0.5f, 0.5f)
+                        .icon(bm)
+                        .title("Danger");
+                googleMap.addMarker(marker);
+
+            }
+        });
 
 //        btn_unregister.setEnabled(false);
 //        btn_call.setEnabled(false);
@@ -829,6 +1205,17 @@ public class MainActivity extends AppCompatActivity { // AppCompatActivity {
         btn_map.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (controlLayout.getVisibility() == View.VISIBLE) {
+                    controlLayout.setVisibility(View.GONE);
+                    mapLayout.setVisibility(View.VISIBLE);
+                    btn_map.setText("CONTROL VIEW");
+                } else {
+                    controlLayout.setVisibility(View.VISIBLE);
+                    mapLayout.setVisibility(View.GONE);
+                    btn_map.setText("MAP VIEW");
+                }
+
+/*
                 Intent intent = new Intent(getApplicationContext(), MapsMarkerActivity.class);
 //                Intent intent = new Intent(getApplicationContext(), MapActivity.class);
                 intent.putExtra("TRACKING", tracking);
@@ -836,6 +1223,8 @@ public class MainActivity extends AppCompatActivity { // AppCompatActivity {
                 intent.putExtra("FLATITUDE", 34.043709);
                 intent.putExtra("FLONGITUDE", -118.432666);
                 startActivity(intent);
+
+ */
             }
         });
 
@@ -1105,13 +1494,14 @@ public class MainActivity extends AppCompatActivity { // AppCompatActivity {
             }
         });
 
+        /*
         new Timer().scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 sendLocation();
             }
         }, 0, 5000);
-
+        */
     }
 
     private void sendLocation() {
